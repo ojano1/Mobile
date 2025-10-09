@@ -1,0 +1,153 @@
+> [!tip] Example Format  
+> `- [ ] Habit - Meditate 📅  🔁 every day 🔼 [[Project - Test]] [[🌱 Area - …]] [[RelatedNote]]`  
+> Use this as a guide. Actual tasks below start blank so you don’t need to delete placeholders.
+
+---
+
+## 🔄 Habit
+
+### Regular Habit
+- [ ] Habit - ZZ Test Template 📅  🔁 🔼 [[]] [[]] [[]] #task
+  > Habit details, triggers, or instructions here (collapsible in dashboards).
+
+---
+
+## 📝 Notes
+- Put supporting info, reflections, or progress logs here.  
+- This section does not appear in dashboards.
+
+---
+
+## ℹ️ Footnotes
+- 📅 = Deadline (due date)  
+- 🛫 = Start date / scheduled  
+- 🔁 = Recurrence (`every day`, `every week`, `every month`, `every weekday`)  
+- 🔺 High / 🔼 Medium / 🔽 Low → Priority
+
+### 📅Last 30 Days Grid
+```dataviewjs
+// === Foldable Habit Grid (7 cols) + Streak + Completion % ===
+// Reads habit tasks in this file.
+
+const ANCHOR = "today"; // "today" or "latest"
+const M = window.moment;
+const toISO = d => M(d).format("YYYY-MM-DD");
+
+// --- extract date from task text ---
+function extractISO(s) {
+  s = String(s).trim();
+  let m = s.match(/(\d{4}-\d{2}-\d{2})(?:\s*\^\d{4}-\d{2}-\d{2})?\s*$/); if (m) return m[1];
+  m = s.match(/due\((\d{4}-\d{2}-\d{2})\)/i);                             if (m) return m[1];
+  m = s.match(/due::\s*(\d{4}-\d{2}-\d{2})/i);                           if (m) return m[1];
+  m = s.match(/📅\s*(\d{4}-\d{2}-\d{2})/);                                if (m) return m[1];
+  return null;
+}
+
+// --- collect tasks ---
+const rawTasks = dv.current().file.tasks ?? [];
+const tasks = rawTasks
+  .map(t => ({ date: extractISO(t.text), done: !!t.completed }))
+  .filter(t => t.date)
+  .sort((a,b) => a.date.localeCompare(b.date));
+
+if (!tasks.length) {
+  dv.paragraph("No habit tasks found.");
+} else {
+  const state = new Map(tasks.map(t => [t.date, t.done]));
+
+  // Window
+  const latest = M(tasks[tasks.length - 1].date).startOf("day");
+  const today  = M().startOf("day");
+  const end    = (ANCHOR === "today") ? today : latest;
+  const start  = end.clone().subtract(29, "days");
+  const gridStart = start.clone().startOf("isoWeek");
+  const gridEnd   = end.clone().endOf("isoWeek");
+
+  // --- streak ---
+  let streak = 0;
+  {
+    let d = end.clone();
+    for (let i = 0; i < 30; i++) {
+      const iso = toISO(d);
+      if (state.get(iso)) streak++; else break;
+      d.subtract(1, "day");
+    }
+  }
+
+  // --- completion rate ---
+  const recent = Array.from({length: 30}, (_,i) => toISO(start.clone().add(i,"days")));
+  const doneCount = recent.filter(d => state.get(d)).length;
+  const completionRate = ((doneCount / 30) * 100).toFixed(0);
+
+  // --- render ---
+  const wrap = dv.el("div", "", { cls: "weekly-streak-wrap" });
+  wrap.createEl("p", { text: `🔥 Current streak: ${streak} day${streak===1?"":"s"} • 📊 ${completionRate}% complete` });
+
+  // header
+  const head = wrap.createDiv({ cls: "weekly-streak-head" });
+  ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(h => head.createDiv({ cls: "head", text: h }));
+
+  // grid
+  const grid = wrap.createDiv({ cls: "weekly-streak-grid" });
+  let d = gridStart.clone();
+  while (d.isSameOrBefore(gridEnd)) {
+    const iso = toISO(d);
+    const inWindow = d.isSameOrAfter(start) && d.isSameOrBefore(end);
+    const done = inWindow ? !!state.get(iso) : false;
+
+    const cell = grid.createDiv({ cls: "weekly-streak-cell" });
+    if (!inWindow) cell.classList.add("pad");
+    if (done && inWindow) cell.classList.add("hit");
+
+    cell.createDiv({ cls: "num", text: inWindow ? d.format("D")   : "" });
+    cell.createDiv({ cls: "ddd", text: inWindow ? d.format("ddd") : "" });
+    cell.setAttr("title", inWindow ? `${d.format("ddd, DD MMM YYYY")} ${done ? "✅ Done" : "❌ Missed"}` : "");
+
+    d.add(1, "day");
+  }
+
+  // --- style ---
+  const style = document.createElement("style");
+  style.textContent = `
+  .weekly-streak-wrap { margin-top:.5rem; }
+  .weekly-streak-head {
+    display:grid; grid-template-columns: repeat(7, 1fr);
+    gap:6px; max-width: 520px; margin-bottom:6px;
+  }
+  .weekly-streak-head .head {
+    text-align:center; font-size:.75em; color: var(--text-faint);
+  }
+  .weekly-streak-grid {
+    display:grid; grid-template-columns: repeat(7, 1fr);
+    gap:6px; max-width: 520px;
+  }
+  .weekly-streak-cell {
+    aspect-ratio:1/1; border-radius:10px;
+    background: var(--background-modifier-border);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+  }
+  .weekly-streak-cell .num { font-weight:700; font-size:.9em; color: var(--text-muted); line-height:1; }
+  .weekly-streak-cell .ddd { font-size:.7em; color: var(--text-faint); line-height:1; margin-top:2px; }
+  .weekly-streak-cell.hit { background: var(--interactive-accent); }
+  .weekly-streak-cell.hit .num, .weekly-streak-cell.hit .ddd { color:white; }
+  .weekly-streak-cell.pad { opacity:.35; }
+  `;
+  wrap.appendChild(style);
+}
+```
+
+
+### Log
+<%*
+const today = tp.date.now("YYYY-MM-DD");
+
+// Use the note title as the label. Strip leading symbols/emojis if you prefer.
+const KEEP_EMOJI = true; // set true to keep "🔁"
+const raw = tp.file.title ?? "";
+const label = KEEP_EMOJI ? raw : raw.replace(/^[^A-Za-z0-9]+/, "").trim();
+
+// Result: "- [ ] <filename> YYYY-MM-DD ^YYYY-MM-DD"
+tR = `- [ ] ${label} ${today} ^${today}`;
+%>
+

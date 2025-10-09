@@ -1,0 +1,404 @@
+
+
+
+
+### ✍️My Notes
+
+'
+'
+'
+___
+### 📌My tasks for today
+
+~~~dataviewjs
+const ROOT = "03 SaveBox/Active";
+
+// --- get "today" from the host filename ---
+const hostName = dv.current().file.name;
+// supports "07 Oct 2025" or "Tue, 07 Oct 2025"
+const m = hostName.match(/(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\s*(\d{4})/i);
+if (!m) { dv.paragraph("❌ Host filename needs a date like `07 Oct 2025`."); return; }
+const mm = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"}[m[2].toLowerCase().slice(0,3)];
+const day = String(parseInt(m[1],10)).padStart(2,"0");
+const todayISO = `${m[3]}-${mm}-${day}`;
+// --- end host date ---
+
+const pages = dv.pages(`"${ROOT}"`);
+
+function priorityLabel(p) {
+  if (!p) return "";
+  const val = String(p).toLowerCase();
+  if (val.startsWith("h")) return "High";
+  if (val.startsWith("m")) return "Med";
+  if (val.startsWith("l")) return "Low";
+  return "";
+}
+
+let listItems = [];
+
+// Tasks with due today (from host filename)
+for (const p of pages) {
+  const tasks = p.file?.tasks ?? [];
+  for (const t of tasks) {
+    const d = t.due ? t.due.toISODate() : null;
+    if (!t.completed && d === todayISO) {
+      const line = dv.el("div", "", { cls: "dv-today-task" });
+
+      // checkbox + text
+      const container = line.createSpan();
+      container.appendChild(dv.taskList([t], false));
+
+      // meta info
+      const meta = [];
+      if (p.duration_hours) meta.push(`${p.duration_hours}h`);
+      if (p.priority) meta.push(priorityLabel(p.priority));
+      if (meta.length) line.createSpan({ text: "  ·  " + meta.join(" · ") });
+
+      listItems.push(line);
+    }
+  }
+}
+
+// Notes with frontmatter due (same comparison to host date)
+for (const p of pages) {
+  const fm = p.file?.frontmatter ?? {};
+  const fmDueISO = fm.due ? dv.date(fm.due).toISODate() : null;
+  const isDone = fm.done === true || fm.completed === true;
+  if (fmDueISO === todayISO && !isDone) {
+    const line = dv.el("div", "", { cls: "dv-today-note" });
+
+    // checkbox
+    const cb = line.createEl("input", { type: "checkbox" });
+    cb.addEventListener("change", async e => {
+      await toggleFrontmatterDone(p.file.path, e.target.checked);
+      app.workspace.trigger("dataview:refresh-views");
+    });
+
+    line.createSpan({ text: " " });
+    const a = line.createEl("a", { href: "#", text: p.file.name });
+    a.addEventListener("click", evt => {
+      evt.preventDefault();
+      app.workspace.openLinkText(p.file.path, dv.current().file.path, false);
+    });
+
+    const meta = [];
+    if (p.duration_hours) meta.push(`${p.duration_hours}h`);
+    if (p.priority) meta.push(priorityLabel(p.priority));
+    if (meta.length) line.createSpan({ text: "  ·  " + meta.join(" · ") });
+
+    listItems.push(line);
+  }
+}
+
+// toggle YAML done (unchanged)
+async function toggleFrontmatterDone(filePath, value) {
+  const file = app.vault.getAbstractFileByPath(filePath);
+  if (!file) return;
+  const content = await app.vault.read(file);
+  const m = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (m) {
+    let fm = m[1];
+    if (/^done:/m.test(fm)) {
+      fm = fm.replace(/^done:\s*(true|false).*$/m, `done: ${value}`);
+    } else if (/^completed:/m.test(fm)) {
+      fm = fm.replace(/^completed:\s*(true|false).*$/m, `completed: ${value}`);
+    } else {
+      fm += `\ndone: ${value}`;
+    }
+    await app.vault.modify(file, `---\n${fm}\n---\n${m[2]}`);
+  } else {
+    await app.vault.modify(file, `---\ndone: ${value}\n---\n${content}`);
+  }
+}
+
+if (!listItems.length) {
+  dv.paragraph("✅ All done! 👏☕️");
+} else {
+  for (const item of listItems) dv.container.appendChild(item);
+}
+~~~
+
+### My Habits for today:
+```dataviewjs
+const HABIT_FOLDER = "03 SaveBox/Active";
+
+// Get date from current note's filename: DD MMM YYYY
+const fileName = dv.current()?.file?.name ?? "";
+const m = fileName.match(/(\d{1,2} [A-Za-z]{3} \d{4})/);
+
+let fileDate = null;
+if (m) fileDate = window.moment(m[1], "DD MMM YYYY").format("YYYY-MM-DD");
+
+if (!fileDate) {
+  dv.paragraph("No valid date found in filename.");
+} else {
+  const pages = dv.pages(`"${HABIT_FOLDER}"`)
+    .where(p => p.file.name.includes("Habit -") || p.file.name.includes("🔁Habit -"));
+
+  function pickTasksForDate(p) {
+    const ts = p.file.tasks ?? [];
+    const rx = new RegExp(`(?:\\s|\\^)${fileDate}\\s*$`);
+    const dated = ts.filter(t => rx.test(t.text));
+    if (!dated.length) return null;
+    return dated.find(t => !t.completed) ?? dated[0];
+  }
+
+  const tasks = pages.array().map(pickTasksForDate).filter(Boolean);
+  if (tasks.length) dv.taskList(tasks, false);
+  else dv.paragraph(`No habit tasks for ${m[1]}.`);
+}
+
+```
+[[🧠Mind Map]]
+### Overdue Tasks
+
+~~~dataviewjs
+const ROOT = "03 SaveBox/Active";
+
+// --- get "today" (host date) from the host filename ---
+const hostName = dv.current().file.name;
+// supports "07 Oct 2025" or "Tue, 07 Oct 2025"
+const m = hostName.match(/(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\s*(\d{4})/i);
+if (!m) { dv.paragraph("❌ Host filename needs a date like `07 Oct 2025`."); return; }
+const mm = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"}[m[2].toLowerCase().slice(0,3)];
+const day = String(parseInt(m[1],10)).padStart(2,"0");
+const todayISO = `${m[3]}-${mm}-${day}`;
+const today = dv.date(todayISO);
+// --- end host date ---
+
+const pages = dv.pages(`"${ROOT}"`);
+
+function priorityLabel(p) {
+  if (!p) return "";
+  const val = String(p).toLowerCase();
+  if (val.startsWith("h")) return "High";
+  if (val.startsWith("m")) return "Med";
+  if (val.startsWith("l")) return "Low";
+  return "";
+}
+
+// helper to calculate day difference
+function daysBetween(older, newer) {
+  const diff = Math.floor((newer.ts - older.ts) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+let listItems = [];
+
+// Tasks with due before host date (overdue)
+for (const p of pages) {
+  const tasks = p.file?.tasks ?? [];
+  for (const t of tasks) {
+    const d = t.due ? t.due.toISODate() : null;
+    if (!t.completed && d && d < todayISO) {
+      const dueDate = dv.date(d);
+      const diff = daysBetween(dueDate, today);
+      const line = dv.el("div", "", { cls: "dv-overdue-task" });
+
+      // checkbox + text
+      const container = line.createSpan();
+      container.appendChild(dv.taskList([t], false));
+
+      // days due display
+      const text = diff === 1 ? "1 day due" : `${diff} days due`;
+      line.createSpan({ text: "  ·  " + text });
+
+      listItems.push(line);
+    }
+  }
+}
+
+// Notes with frontmatter due before host date
+for (const p of pages) {
+  const fm = p.file?.frontmatter ?? {};
+  const fmDueISO = fm.due ? dv.date(fm.due).toISODate() : null;
+  const isDone = fm.done === true || fm.completed === true;
+  if (fmDueISO && fmDueISO < todayISO && !isDone) {
+    const dueDate = dv.date(fmDueISO);
+    const diff = daysBetween(dueDate, today);
+    const line = dv.el("div", "", { cls: "dv-overdue-note" });
+
+    // checkbox
+    const cb = line.createEl("input", { type: "checkbox" });
+    cb.addEventListener("change", async e => {
+      await toggleFrontmatterDone(p.file.path, e.target.checked);
+      app.workspace.trigger("dataview:refresh-views");
+    });
+
+    line.createSpan({ text: " " });
+    const a = line.createEl("a", { href: "#", text: p.file.name });
+    a.addEventListener("click", evt => {
+      evt.preventDefault();
+      app.workspace.openLinkText(p.file.path, dv.current().file.path, false);
+    });
+
+    // days due display
+    const text = diff === 1 ? "1 day due" : `${diff} days due`;
+    line.createSpan({ text: "  ·  " + text });
+
+    listItems.push(line);
+  }
+}
+
+// toggle YAML done (unchanged)
+async function toggleFrontmatterDone(filePath, value) {
+  const file = app.vault.getAbstractFileByPath(filePath);
+  if (!file) return;
+  const content = await app.vault.read(file);
+  const m = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (m) {
+    let fm = m[1];
+    if (/^done:/m.test(fm)) {
+      fm = fm.replace(/^done:\s*(true|false).*$/m, `done: ${value}`);
+    } else if (/^completed:/m.test(fm)) {
+      fm = fm.replace(/^completed:\s*(true|false).*$/m, `completed: ${value}`);
+    } else {
+      fm += `\ndone: ${value}`;
+    }
+    await app.vault.modify(file, `---\n${fm}\n---\n${m[2]}`);
+  } else {
+    await app.vault.modify(file, `---\ndone: ${value}\n---\n${content}`);
+  }
+}
+
+if (!listItems.length) {
+  dv.paragraph("✅ All done! 👏");
+} else {
+  for (const item of listItems) dv.container.appendChild(item);
+}
+~~~
+___
+#### 👨‍💻My Daily Timeslots (6hrs)
+Type your task links below these timeslots to plan your day.
+##### 🌅Morning (3.5hrs, 9.00-11.30AM)
+*High-impact task*
+
+##### ☀️Afternoon (1.5hrs, 2.00-3.30PM)
+*Key delivery/admin task*
+
+##### 🌙Night (1hr, 9.00-10.00PM)
+*Habit / reflection*
+
+---
+#### 🔄 End-of-Day Review
+- [ ] Check off tasks honestly.  
+- [ ] Review today’s captures in **Inbox dashboard**.  
+- [ ] Promote worthwhile items → rename to remove `!`.  
+- [ ] One insight / lesson: …  
+
+---
+
+### 📫Inbox
+(Remove suffix ! to release from inbox)
+~~~dataview
+TABLE
+  dateformat(file.ctime, "yyyy-MM-dd") AS Created,
+  gap + " " + choice(gap = 1, "day", "days") AS Age
+FROM "03 SaveBox/Active"
+WHERE endswith(file.name, "!")
+FLATTEN floor((
+  date(dateformat(date(now), "yyyy-MM-dd"))
+  - date(dateformat(file.ctime, "yyyy-MM-dd"))
+).milliseconds / 86400000) AS gap
+SORT file.ctime ASC
+
+~~~
+### 🔗Backlinks
+~~~dataviewjs
+const backlinks = dv.pages()
+  .where(p =>
+    p.file.outlinks &&
+    p.file.outlinks.some(link => link.path === dv.current().file.path) &&
+    !/template/i.test(p.file.folder) &&
+    !/archive/i.test(p.file.folder)
+  )
+  .sort(p => p.file.name, 'asc');
+
+if (backlinks.length) {
+  dv.list(backlinks.map(p => p.file.link));
+} else {
+  dv.paragraph("None");
+}
+~~~
+
+```templater
+<%*
+const HABIT_FOLDER = "03 SaveBox/Active";
+const M = window.moment;
+
+// --- Get date from current note filename ---
+const fileName = tp.file.title; // current note filename without extension
+const dateMatch = fileName.match(/(\d{1,2} [A-Za-z]{3} \d{4})/);
+
+if (!dateMatch) {
+  tR += "❌ No valid date found in filename.";
+  return;
+}
+
+const today = M(dateMatch[1], "DD MMM YYYY").format("YYYY-MM-DD");
+const todayKey = M(today, "YYYY-MM-DD").format("dddd");
+
+// --- Day aliases ---
+const dayAliases = {
+  Monday: ["monday","mon","senin","sen"],
+  Tuesday: ["tuesday","tue","tues","selasa","sel"],
+  Wednesday: ["wednesday","wed","rabu","rab"],
+  Thursday: ["thursday","thu","thur","thurs","kamis","kam"],
+  Friday: ["friday","fri","jumat","jum'at","jum"],
+  Saturday: ["saturday","sat","sabtu","sab"],
+  Sunday: ["sunday","sun","minggu","ming","ahad","ahd"],
+};
+
+const aliasToKey = {};
+for (const [k, arr] of Object.entries(dayAliases))
+  for (const a of arr)
+    aliasToKey[a.toLowerCase()] = k;
+
+const files = app.vault.getMarkdownFiles()
+  .filter(f => f.path.startsWith(HABIT_FOLDER + "/"))
+  .filter(f => /(^| )Habit -|^🔁Habit -/.test(f.basename));
+
+const hasTodayTask = (content) =>
+  new RegExp(`^\\s*- \\[.\\] .*?(?:\\s|\\^)${today}\\s*$`, "m").test(content);
+
+const pickCore = (basename) => {
+  const parts = basename.split(" - ");
+  return parts.length > 1 ? parts.slice(1).join(" - ") : basename;
+};
+
+const allAliases = Object.keys(aliasToKey).sort((a,b)=>b.length-a.length).join("|");
+const aliasRe = new RegExp(`\\b(?:${allAliases})\\b`, "gi");
+
+const extractWeekdays = (basename) => {
+  const hits = basename.match(aliasRe);
+  if (!hits) return [];
+  return [...new Set(hits.map(s => aliasToKey[s.toLowerCase()]).filter(Boolean))];
+};
+
+for (const file of files) {
+  let content = await app.vault.read(file);
+
+  const weekdays = extractWeekdays(file.basename);
+  const isWeekly = weekdays.length > 0;
+
+  if (isWeekly && !weekdays.includes(todayKey)) continue;
+  if (hasTodayTask(content)) continue;
+
+  const core = pickCore(file.basename);
+  const label = `Habit - ${core}`;
+  const line  = `- [ ] 🔁${label} ${today} ^${today}`;
+
+  const logHeaderRe = /(^|\n)###\s+Log\s*(?:\n|$)/;
+  if (logHeaderRe.test(content)) {
+    content = content.replace(logHeaderRe, (m, p1) => `${p1}### Log\n\n${line}\n`);
+  } else {
+    content = content.trimEnd() + `\n\n### Log\n\n${line}\n`;
+  }
+
+  await app.vault.modify(file, content);
+}
+%>
+
+```
+
+
