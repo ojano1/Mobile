@@ -1,0 +1,20 @@
+# Ignore Obsidian system folder
+.obsidian/
+
+# Optional: ignore cache and trash
+.obsidian-cache/
+.trash/
+.excalidraw/
+
+# Ignore mobile-only config files
+.obsidian-mobile.json
+
+# Ignore iCloud metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ignore temporary files
+Thumbs.db
+*.tmp
+*.log
