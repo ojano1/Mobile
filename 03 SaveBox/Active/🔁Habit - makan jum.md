@@ -113,4 +113,4 @@ if (!tasks.length) {
 ```
 ### Log
 
-- [ ] 🔁Habit - makan jum 2025-10-10 ^2025-10-10
+- [x] 🔁Habit - makan jum 2025-10-10 ^2025-10-10

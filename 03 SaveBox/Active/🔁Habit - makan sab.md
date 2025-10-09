@@ -69,10 +69,8 @@ if (!tasks.length) {
   // --- render ---
   const wrap = dv.el("div", "", { cls: "weekly-streak-wrap" });
 
-  wrap.createEl("p", {
-    text: "",
-    cls: "streak-line"
-  }).innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"} • 📊 ${completionRate}% complete</strong>`;
+  wrap.createEl("p", { text: "", cls: "streak-line" })
+    .innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"} • 📊 ${completionRate}% complete</strong>`;
 
   // header
   const head = wrap.createDiv({ cls: "weekly-streak-head" });
@@ -90,9 +88,12 @@ if (!tasks.length) {
     if (!inWindow) cell.classList.add("pad");
     if (done && inWindow) cell.classList.add("hit");
 
-    cell.createDiv({ cls: "num", text: inWindow ? d.format("D")   : "" });
-    cell.createDiv({ cls: "ddd", text: inWindow ? d.format("ddd") : "" });
-    cell.setAttr("title", inWindow ? `${d.format("ddd, DD MMM YYYY")} ${done ? "✅ Done" : "❌ Missed"}` : "");
+    // Day + Month label only
+    cell.createDiv({ cls: "num", text: inWindow ? d.format("D") : "" });
+    cell.createDiv({ cls: "mmm", text: inWindow ? d.format("MMM") : "" });
+    cell.setAttr("title",
+      inWindow ? `${d.format("ddd, DD MMM YYYY")} ${done ? "✅ Done" : "❌ Missed"}` : ""
+    );
 
     d.add(1, "day");
   }
@@ -104,32 +105,45 @@ if (!tasks.length) {
   .streak-line strong { font-weight:700; }
   .weekly-streak-head {
     display:grid; grid-template-columns: repeat(7, 1fr);
-    gap:6px; max-width: 520px; margin-bottom:6px;
+    gap:6px; max-width:520px; margin-bottom:6px;
   }
   .weekly-streak-head .head {
     text-align:center; font-size:.75em; color: var(--text-faint);
   }
   .weekly-streak-grid {
     display:grid; grid-template-columns: repeat(7, 1fr);
-    gap:6px; max-width: 520px;
+    gap:6px; max-width:520px;
   }
   .weekly-streak-cell {
     aspect-ratio:1/1; border-radius:10px;
     background: var(--background-modifier-border);
     display:flex; flex-direction:column;
     align-items:center; justify-content:center;
+    padding-top:4px;
   }
-  .weekly-streak-cell .num { font-weight:700; font-size:.9em; color: var(--text-muted); line-height:1; }
-  .weekly-streak-cell .ddd { font-size:.7em; color: var(--text-faint); line-height:1; margin-top:2px; }
-  .weekly-streak-cell.hit { background: var(--interactive-accent); }
-  .weekly-streak-cell.hit .num, .weekly-streak-cell.hit .ddd { color:white; }
+  .weekly-streak-cell .num {
+    font-weight:700; font-size:.95em; color: var(--text-muted); line-height:1.1;
+  }
+  .weekly-streak-cell .mmm {
+    font-size:.7em; color: var(--text-faint); line-height:1.1; margin-top:2px;
+  }
+  .weekly-streak-cell.hit {
+    background: var(--interactive-accent);
+  }
+  .weekly-streak-cell.hit .num,
+  .weekly-streak-cell.hit .mmm {
+    color:white;
+  }
   .weekly-streak-cell.pad { opacity:.35; }
   `;
   wrap.appendChild(style);
 }
-
 ```
 ### Log
 
 - [x] 🔁Habit - makan sab 2025-10-11 ^2025-10-11
 - [x] 🔁Habit - makan jum 2025-10-10 ^2025-10-10
+
+
+
+###  Comment
