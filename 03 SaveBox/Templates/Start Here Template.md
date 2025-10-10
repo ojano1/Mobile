@@ -11,11 +11,7 @@ ___
 >- Create your Area as a link file. Name it with prefix "Area - " 
 ### Write your Areas here👇
 Hint: Create a link to your Area page using prefix: `Area - `
-[[🌱Area - Health]]
-[[🌱Area - Finance]]
-[[🌱Area - Business]]
-[[🌱Area - Family]]
-[[🌱Area - Deen]]
+[[Area Example]]
 
 >[!tip] Step 2: Make one wish per area that would make you happy.
 >- Ask yourself: What makes me happy in my (area) is if I have/can...
