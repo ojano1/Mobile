@@ -1,7 +1,3 @@
-
-
-
-
 ### ✍️My Notes
 
 '
@@ -272,12 +268,19 @@ ___
 Type your task links below these timeslots to plan your day.
 ##### 🌅Morning (3.5hrs, 9.00-11.30AM)
 *High-impact task*
-
+'
+'
+'
 ##### ☀️Afternoon (1.5hrs, 2.00-3.30PM)
 *Key delivery/admin task*
-
+'
+'
+'
 ##### 🌙Night (1hr, 9.00-10.00PM)
 *Habit / reflection*
+'
+'
+'
 
 ---
 #### 🔄 End-of-Day Review
@@ -289,7 +292,7 @@ Type your task links below these timeslots to plan your day.
 ---
 
 ### 📫Inbox:
-(Remove suffix ! to release from inbox)
+(Remove suffix ! from file name to release)
 ~~~dataview
 TABLE
   dateformat(file.ctime, "yyyy-MM-dd") AS Created,
