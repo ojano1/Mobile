@@ -265,7 +265,7 @@ if (!listItems.length) {
 ~~~
 ___
 #### 👨‍💻My Daily Timeslots (6hrs)
-Type your task links below these timeslots to plan your day.
+*Type your tasks in these timeslots to plan your day.*
 ##### 🌅Morning (3.5hrs, 9.00-11.30AM)
 *High-impact task*
 '
@@ -284,11 +284,13 @@ Type your task links below these timeslots to plan your day.
 
 ---
 #### 🔄 End-of-Day Review
-- [ ] Check off tasks honestly.  
-- [ ] Review today’s captures in **Inbox dashboard**.  
-- [ ] Promote worthwhile items → rename to remove `!`.  
-- [ ] One insight / lesson: …  
-
+How did the day go?
+What worked and what didn’t?
+What will you do differently tomorrow?
+'
+'
+'
+'
 ---
 
 ### 📫Inbox:
