@@ -217,7 +217,7 @@ if (HY == null) {
 
 
 ___
-### 🔗Backlinks
+### 🔗Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>

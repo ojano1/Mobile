@@ -1,7 +1,7 @@
 ---
 priority: High
 status: Active
-create date: <% tp.file.creation_date("YYYY-MM-DD") %>
+create date: 2025-10-10
 ---
 
 > [!tip] Step 1: 🎯Set one clear goal
@@ -40,3 +40,4 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+

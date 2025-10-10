@@ -70,20 +70,36 @@ SORT file.name ASC
 > - Deadline
 > - How you will verify
 
-#### Done Criteria 👇
-''
-### ✍️Comments
-''
+#### Done Criteria:
+'
+'
+'
+'
+### ✍️Comments:
+'
+'
+'
+'
 ___
-### Links  
+### Links  :
 ⚠️Add goal links here if missing in backlinks below to avoid orphan project.  
 
 
-> [!info] Backlinks  
-> ```dataview
-> LIST
-> FROM ""
-> WHERE contains(file.outlinks, this.file.link)
-> SORT file.name ASC
-> ```
+### 🔗Backlinks:
+~~~dataviewjs
+const backlinks = dv.pages()
+  .where(p =>
+    p.file.outlinks &&
+    p.file.outlinks.some(link => link.path === dv.current().file.path) &&
+    !/template/i.test(p.file.folder) &&
+    !/archive/i.test(p.file.folder)
+  )
+  .sort(p => p.file.name, 'asc');
+
+if (backlinks.length) {
+  dv.list(backlinks.map(p => p.file.link));
+} else {
+  dv.paragraph("None");
+}
+~~~
 

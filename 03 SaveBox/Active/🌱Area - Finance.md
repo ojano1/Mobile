@@ -1,7 +1,7 @@
 ---
 priority: High
 status: Active
-create date: <% tp.file.creation_date("YYYY-MM-DD") %>
+create date: 2025-10-10
 ---
 
 > [!tip] Step 1: 🎯Set one clear goal
@@ -18,10 +18,6 @@ Hint: Create a link to your goal page using prefix: `Goal - `
 > - Create projects **in the goal page**.
 
 ### ✍️Comments:
-'
-'
-'
-'
 ___
 ### 🔗Backlinks:
 ~~~dataviewjs
@@ -39,4 +35,5 @@ if (backlinks.length) {
 } else {
   dv.paragraph("None");
 }
-~~~
+
+

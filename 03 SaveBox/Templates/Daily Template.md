@@ -288,7 +288,7 @@ Type your task links below these timeslots to plan your day.
 
 ---
 
-### 📫Inbox
+### 📫Inbox:
 (Remove suffix ! to release from inbox)
 ~~~dataview
 TABLE
@@ -303,7 +303,7 @@ FLATTEN floor((
 SORT file.ctime ASC
 
 ~~~
-### 🔗Backlinks
+### 🔗Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>

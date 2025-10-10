@@ -140,7 +140,7 @@ if (!HW.week) {
 
 ___
 
-### 🔗Backlinks
+### 🔗Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>

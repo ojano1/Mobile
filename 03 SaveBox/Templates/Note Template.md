@@ -20,7 +20,12 @@ ___
 ### 🔗Backlinks
 ~~~dataviewjs
 const backlinks = dv.pages()
-  .where(p => p.file.outlinks && p.file.outlinks.some(link => link.path === dv.current().file.path))
+  .where(p =>
+    p.file.outlinks &&
+    p.file.outlinks.some(link => link.path === dv.current().file.path) &&
+    !/Archive/i.test(p.file.folder) &&
+    !/Template/i.test(p.file.folder)
+  )
   .sort(p => p.file.name, 'asc');
 
 if (backlinks.length) {
