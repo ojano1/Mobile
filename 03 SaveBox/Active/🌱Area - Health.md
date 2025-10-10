@@ -5,6 +5,7 @@ create date: 2025-10-10
 ---
 
 > [!tip] Step 1: 🎯Set one clear goal
+> *Start a new one only after you've cempleted it*
 > - Use verb, measurable, time unit.
 > - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
 
@@ -13,6 +14,8 @@ create date: 2025-10-10
 Hint: Create a link to your goal page using prefix: `Goal - `
 [[🎯Goal - Start sleeping 7hours in 1 month]]
 [[Goal Gain weight 2kg in 3 months]]
+'
+[[🧠Mind Map]]
 
 > [!tip] Step 2: Work from the goal page
 > - Open the goal note above.
@@ -20,7 +23,7 @@ Hint: Create a link to your goal page using prefix: `Goal - `
 
 ### ✍️Comments:
 ___
-### 🔗Backlinks:
+### 🔗⬅️Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>
