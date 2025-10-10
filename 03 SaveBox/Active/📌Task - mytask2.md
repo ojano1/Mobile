@@ -4,12 +4,13 @@ status: Active
 create date: 2025-10-05
 due: 2025-10-08
 duration_hours: "0.5"
+done: true
 ---
 
 My tags (Start with # and a letter): #OCT 
 
 > [!success] My Task
-> - [ ] 📌Task - mytask2
+> - [x] 📌Task - mytask2
 >
 > - Tick when done.
 > - ⚠️ Keep only one task here, go to Project page to add another.

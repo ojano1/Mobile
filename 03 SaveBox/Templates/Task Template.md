@@ -1,90 +1,56 @@
 <%*
 /*
- * Task Template — hard-prefix + title-after-dash
- * Result checkbox: "📌Task - <text after last dash in title>"
+ * Task Template — adds unique block ID for two-way sync
+ * Result checkbox: "📌Task - <core>" ^t-<timestamp>
  */
 
-const PREFIX = "📌Task - "
-const title  = (tp.file.title ?? "").trim()
+const PREFIX = "📌Task - ";
+const title  = (tp.file.title ?? "").trim();
+const created = tp.file.creation_date("YYYY-MM-DD");
 
-// Get text after the last "-"
-// If no "-", strip leading symbols and "task"
+// Extract text after last "-"
 let core = title.includes("-")
   ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*task\b\s*/i, "").trim()
+  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*task\b\s*/i, "").trim();
+if (!core) core = "Untitled";
 
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
+// Unique block ID (timestamp-based)
+const uid = "t-" + moment().format("YYYYMMDD-HHmmss");
 
 const lines = [
-  '---',
-  'priority: Medium',
-  'status: Active',
+  "---",
+  "priority: Medium",
+  "status: Active",
   `create date: ${created}`,
-  'due: ',
-  'duration_hours: ',
-  '---',
-  '',
-  'Tags (start with # and a letter):',
-'',
+  "due: ",
+  "duration_hours: ",
+  "---",
+  "",
+  "Tags (start with # and a letter):",
+  "",
   `> [!success] My Task`,
-  `> - [ ] ${PREFIX}${core}`,
+  `> - [ ] ${PREFIX}${core} ^${uid}`,
   `>`,
-  ``,
-]
+  "",
+];
 
-tR = lines.join('\n')
+tR = lines.join("\n");
 %>
 ### 👷‍♂️Instructions:
-> [!tip] Step 1: ✍️Add more details
-> - Add description
-> - Estimate hour duration in the property
-> - Define the output of this task.
+> [!tip] Step 1: ✍️Add details  
+> - Describe, set duration_hours  
+> - Define expected output
 
 ### ✍️Description  
 ''
 ___
 
-> [!tip] Step 2: Open each tasks to confirm it's created.
-
-### All tasks linked to this project:
-~~~dataview
-LIST
-FROM ""
-WHERE contains(file.name, "Project")
-AND (
-  startswith(file.folder, "01 Definition")
-  OR startswith(file.folder, "02 Execution")
-  OR startswith(file.folder, "03 SaveBox/Active")
-  OR startswith(file.folder, "04 Output")
-)
-AND (
-  contains(this.file.outlinks, file.link)
-  OR contains(file.outlinks, this.file.link)
-)
-SORT file.name ASC
-~~~
-
-> [!tip] Step 3: ✅(Optional) Define done criteria  
-> - Outcome, amount, or result  
-> - Deadline  
-> - How you will verify  
-
-### ✅Done Criteria:
-'
-'
-'
-'
-### ✍️Comments:
-'
-'
-'
-'
+### ✅Done Criteria  
+''
 ___
 
 ### 🔗➡️Links:
-*Add project links here if there's none in backlinks*
+*Add project links here if missing*
 
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs
@@ -97,9 +63,6 @@ const backlinks = dv.pages()
   )
   .sort(p => p.file.name, 'asc');
 
-if (backlinks.length) {
-  dv.list(backlinks.map(p => p.file.link));
-} else {
-  dv.paragraph("None");
-}
+if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
+else dv.paragraph("None");
 ~~~

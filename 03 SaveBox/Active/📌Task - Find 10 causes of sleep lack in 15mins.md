@@ -3,15 +3,15 @@ priority: Medium
 status: Active
 create date: 2025-10-10
 due:
-duration_hours: "0.25"
+duration_hours: "1"
 ---
 
-Tags (start with # and a letter):
+Tags (start with # and a letter): #Oct
 
 > [!success] My Task
-> - [ ] 📌Task - Find 10 causes of sleep lack in 15mins
+> - [x] 📌Task - Find 10 causes of sleep lack in 15mins
 >
-
+[[🧠Mind Map]]
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add more details
 > - Add description

@@ -4,7 +4,7 @@ status: Active
 create date:
 duration_hours: "1"
 due: 2025-10-11
-done: false
+done: true
 ---
 Tags (start with # and a letter): #W41
 

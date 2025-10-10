@@ -9,7 +9,7 @@ duration_hours: "0.25"
 Tags (start with # and a letter):
 
 > [!success] My Task
-> - [ ] 📌Task - Find 10 ways to enhance sleep in 15mins
+> - [x] 📌Task - Find 10 ways to enhance sleep in 15mins
 >
 
 ### 👷‍♂️Instructions:
