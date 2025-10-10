@@ -139,7 +139,7 @@ if (!tasks.length) {
   wrap.appendChild(style);
 }
 ```
-### Log
+### 📙Log
 <%*
 const today = tp.date.now("YYYY-MM-DD");
 const M = window.moment;

@@ -139,9 +139,9 @@ if (!tasks.length) {
   wrap.appendChild(style);
 }
 ```
-### Log
+### 📙Log
 
-- [x] 🔁Habit - makan sab 2025-10-11 ^2025-10-11
+- [ ] 🔁Habit - makan sab 2025-10-11 ^2025-10-11
 - [x] 🔁Habit - makan jum 2025-10-10 ^2025-10-10
 
 
