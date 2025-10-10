@@ -8,9 +8,8 @@ ___
 >[!tip] Step 1: 🌱Define Your Areas
 >- Write down the areas of life that matter to you❤️. Examples: Health, Relationships, Career, Money, Faith, Travel. 
 >- Hint: Start light with with one or two Area's only.
->- Create your Area as a link file. Name it with prefix "Area - " 
+>- Create your Area link. Name it with prefix `Area - `
 ### Write your Areas here👇
-Hint: Create a link to your Area page using prefix: `Area - `
 [[🌱Area - Health]]
 [[🌱Area - Finance]]
 [[🌱Area - Business]]
@@ -20,7 +19,7 @@ Hint: Create a link to your Area page using prefix: `Area - `
 >[!tip] Step 2: Make one wish per area that would make you happy.
 >- Ask yourself: What makes me happy in my (area) is if I have/can...
 ### Write your wishes here👇
-Example: What makes me happy in my health is if I can wake up fresh everyday. 
+Example: What makes me happy in my health is if I can wake up feeling fresh everyday. 
 '
 '
 '

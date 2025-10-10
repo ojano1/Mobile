@@ -6,12 +6,13 @@ create date: 2025-10-10
 
 > [!tip] Step 1: 🎯Set one clear goal
 > *Start a new one only after you've cempleted it*
-> - Use verb, measurable, time unit.
+> - Use verb, measurable, time duration.
 > - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
+> - Create a link to your goal page using prefix `Goal - `
 
 
 ### My goal👇
-Hint: Create a link to your goal page using prefix: `Goal - `
+
 [[🎯Goal - Start sleeping 7hours in 1 month]]
 [[Goal Gain weight 2kg in 3 months]]
 '
@@ -22,6 +23,9 @@ Hint: Create a link to your goal page using prefix: `Goal - `
 > - Create projects **in the goal page**.
 
 ### ✍️Comments:
+'
+'
+'
 ___
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs

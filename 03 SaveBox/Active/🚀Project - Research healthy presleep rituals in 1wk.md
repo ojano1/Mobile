@@ -9,22 +9,21 @@ Tags (start with # and a letter):
 
 > [!success] My Project
 > - [ ] 🚀Project - Research healthy presleep rituals in 1wk
->
-> - Tick when done.
-> - ⚠️ Keep only one project here, go to Goal page to add another. 
-
-### 🏁Start Here
+### 👷‍♂️Instructions:
 > [!tip] Step 1: 📌Create tasks  
-> - Break into clear actions.  
 > - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).
 > - Examples: “Draft spec 1 page in 1 hour”, “Email vendor shortlist in 30mins”, “Set review meeting for Tue in 15mins”.
+> - Create links to your task pages using prefix `Task - `  
 
 #### Type your tasks here👇  
-Hint: Create links to your task pages using prefix: `Task - `  
 [[Task - example]]
+'[[📌Task - Find 10 causes of sleep lack in 15mins]]
+'[[📌Task - Find 10 ways to enhance sleep in 15mins]]
+'[[Task Find 10 sunnah about sleep in 15mins]]
+[[🧠Mind Map]]
 
 > [!tip] Step 2: Open task pages and confirm creation.
-### Tasks linked to this project👇
+#### All tasks linked to this project:
 ~~~dataview
 LIST
 FROM ""
@@ -46,22 +45,22 @@ SORT file.name ASC
 > - Deadline
 > - How you will verify
 
-#### Done Criteria:
+#### ✅Done Criteria:
 '
 '
 '
 '
-### ✍️Comments:
+#### ✍️Comments:
 '
 '
 '
 '
 ___
-### Links  :
-⚠️Add goal links here if missing in backlinks below to avoid orphan project.  
+#### 🔗➡️Links  :
+*Add goal links here if missing in the backlinks.*
 
 
-### 🔗Backlinks:
+#### 🔗⬅️Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>

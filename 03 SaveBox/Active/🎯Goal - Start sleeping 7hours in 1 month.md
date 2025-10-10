@@ -12,15 +12,15 @@ Add tags here (start with # and 1 letter):
 > - *Keep only one goal here, go to Area page to add another.*
 
 ### 🏁Start Editing Here
-> [!tip] Step 1: 🚀Create projects
-> - Create projects to realize this goal.
+> [!tip] Step 1: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
+> - Create links to your project page using prefix `Project - `
 
 ### Type your projects here👇
-Hint: Create links to your project pages using prefix: `Project - `
+
 [[🚀Project - Research healthy presleep rituals in 1wk]]
-'
+[[🚀Project - build a set of habits to commit in 1wk]]
 '
 [[🧠Mind Map]]
 

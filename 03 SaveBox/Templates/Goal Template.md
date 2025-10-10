@@ -30,20 +30,18 @@ const lines = [
   `> [!success] My Goal`,
   `> - [ ] ${PREFIX}${core}`,
   `>`,
-  `> - *Keep only one goal here, go to Area page to add another.*`,
   '',
 ]
 
 tR = lines.join('\n')
 %>
-### 🏁Start Editing Here
-> [!tip] Step 1: 🚀Create projects
-> - Create projects that help to realize this goal.
+### 👷‍♂️Instructions:
+> [!tip] Step 1: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
+> - Create links to your project page using prefix `Project - `
 
 ### Type your projects here👇
-Hint: Create links to your project pages using prefix: `Project - `
 [[Project - Example1]]
 '
 '
@@ -55,7 +53,7 @@ Hint: Create links to your project pages using prefix: `Project - `
 > - Open each project note.
 > - Create tasks **in the project page**.
 
-### Projects linked to this goals:
+### All the projects linked to this goals:
 ~~~dataviewjs
 const projects = dv.pages("")
   .where(p =>
@@ -100,7 +98,7 @@ ___
 ___
 
 ### 🔗➡️Links:
-*Add Area links here if missing in backlinks.*
+*Add Area links here if none in backlinks section.*
 '
 '
 '

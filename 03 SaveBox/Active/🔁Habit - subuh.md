@@ -1,4 +1,4 @@
-### 📅Last 30 Days Grid
+### 📅 30 Days Grid
 ```dataviewjs
 // === Foldable Habit Grid (7 cols) + Streak + Completion % ===
 // Reads habit tasks in this file.

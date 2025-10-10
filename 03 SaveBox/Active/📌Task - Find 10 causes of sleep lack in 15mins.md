@@ -1,49 +1,25 @@
-<%*
-/*
- * Task Template — hard-prefix + title-after-dash
- * Result checkbox: "📌Task - <text after last dash in title>"
- */
+---
+priority: Medium
+status: Active
+create date: 2025-10-10
+due:
+duration_hours: "0.25"
+---
 
-const PREFIX = "📌Task - "
-const title  = (tp.file.title ?? "").trim()
+Tags (start with # and a letter):
 
-// Get text after the last "-"
-// If no "-", strip leading symbols and "task"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*task\b\s*/i, "").trim()
+> [!success] My Task
+> - [ ] 📌Task - Find 10 causes of sleep lack in 15mins
+>
 
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
-
-const lines = [
-  '---',
-  'priority: Medium',
-  'status: Active',
-  `create date: ${created}`,
-  'due: ',
-  'duration_hours: ',
-  '---',
-  '',
-  'Tags (start with # and a letter):',
-'',
-  `> [!success] My Task`,
-  `> - [ ] ${PREFIX}${core}`,
-  `>`,
-  ``,
-]
-
-tR = lines.join('\n')
-%>
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add more details
 > - Add description
 > - Estimate hour duration in the property
 > - Define the output of this task.
 
-### ✍️Description  
-''
+### ✍️Description:  
+'AI research and make output report. Shortlist a few related causes to tackle.
 ___
 
 > [!tip] Step 2: Open each tasks to confirm it's created.
@@ -83,10 +59,10 @@ SORT file.name ASC
 '
 ___
 
-### 🔗➡️Links:
+### Links:
 *Add project links here if there's none in backlinks*
 
-### 🔗⬅️Backlinks:
+### 🔗Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>
@@ -103,3 +79,4 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+

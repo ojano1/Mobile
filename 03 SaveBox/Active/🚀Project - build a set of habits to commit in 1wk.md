@@ -1,54 +1,30 @@
-<%*
-/*
- * Project Template — hard-prefix + title-after-dash
- * Result checkbox: "🚀Project - <text after last dash in title>"
- */
+---
+priority: Medium
+status: Active
+create date: 2025-10-10
+due:
+---
 
-const PREFIX = "🚀Project - "
-const title  = (tp.file.title ?? "").trim()
+Tags (start with # and a letter):
 
-// Get text after the last "-"
-// If no "-", strip any leading symbols and "project"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim()
+> [!success] My Project
+> - [ ] 🚀Project - build a set of habits to commit in 1wk
+>
+> - Tick when done.
+> - ⚠️ Keep only one project here, go to Goal page to add another. 
 
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
-
-const lines = [
-  '---',
-  'priority: Medium',
-  'status: Active',
-  `create date: ${created}`,
-  'due: ',
-  '---',
-  '',
-  'Tags (start with # and a letter):',
-'',
-`> [!success] My Project`,
-`> - [ ] ${PREFIX}${core}`,
-`>`,
-``,
-]
-
-tR = lines.join('\n')
-%>
-### 👷‍♂️Instructions:
+### 🏁Start Here
 > [!tip] Step 1: 📌Create tasks  
+> - Break into clear actions.  
 > - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).
 > - Examples: “Draft spec 1 page in 1 hour”, “Email vendor shortlist in 30mins”, “Set review meeting for Tue in 15mins”.
-> - Create links to your task pages using prefix `Task - `  
 
 #### Type your tasks here👇  
+Hint: Create links to your task pages using prefix: `Task - `  
 [[Task - example]]
-'
-'
-'
-[[🧠Mind Map]]
+
 > [!tip] Step 2: Open task pages and confirm creation.
-#### All tasks linked to this project:
+### Tasks linked to this project👇
 ~~~dataview
 LIST
 FROM ""
@@ -70,23 +46,22 @@ SORT file.name ASC
 > - Deadline
 > - How you will verify
 
-#### ✅Done Criteria:
+#### Done Criteria:
 '
 '
 '
 '
-___
 ### ✍️Comments:
 '
 '
 '
 '
 ___
-### 🔗➡️Links  :
-*Add goal links here if missing in the backlinks*
+### Links  :
+⚠️Add goal links here if missing in backlinks below to avoid orphan project.  
 
-___
-### 🔗⬅️Backlinks:
+
+### 🔗Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>
@@ -103,4 +78,5 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+
 

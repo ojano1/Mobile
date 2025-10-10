@@ -6,12 +6,10 @@ create date: <% tp.file.creation_date("YYYY-MM-DD") %>
 
 > [!tip] Step 1: 🎯Set one clear goal
 > *Start a new one only after you've cempleted it*
-> - Use verb, measurable, time unit.
+> - Use verb, measurable amount, time duration.
 > - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
-
-
+> - Create a link to your goal page using prefix `Goal - `
 ### My goal👇
-Hint: Create a link to your goal page using prefix: `Goal - `
 [[Goal - Example]]
 '
 '
