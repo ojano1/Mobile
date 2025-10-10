@@ -5,8 +5,8 @@ create date: <% tp.file.creation_date("YYYY-MM-DD") %>
 ---
 
 > [!tip] Step 1: 🎯Set one clear goal
-> - Use verb, measurable, time bound.
-> - Examples: “Save $3,000 this year”, “Run a 5K by March”, “Lose 5 kg this month”.
+> - Use verb, measurable, time unit.
+> - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
 
 
 ### My goal👇

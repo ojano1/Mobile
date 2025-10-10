@@ -5,13 +5,14 @@ create date: 2025-10-10
 ---
 
 > [!tip] Step 1: 🎯Set one clear goal
-> - Use verb, measurable, time bound.
-> - Examples: “Save $3,000 this year”, “Run a 5K by March”, “Lose 5 kg this month”.
+> - Use verb, measurable, time unit.
+> - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
 
 
 ### My goal👇
 Hint: Create a link to your goal page using prefix: `Goal - `
-[[Goal - Example]]
+[[🎯Goal - Start sleeping 7hours in 1 month]]
+[[Goal Gain weight 2kg in 3 months]]
 
 > [!tip] Step 2: Work from the goal page
 > - Open the goal note above.

@@ -1,55 +1,28 @@
-<%*
-/*
- * Goal Template — keep local title logic
- * Result checkbox: "🎯Goal - <text after last dash in title>"
- */
+---
+priority: High
+status: Active
+create date: 2025-10-10
+due:
+---
 
-const PREFIX = "🎯Goal - "
-const title  = (tp.file.title ?? "").trim()
+Add tags here (start with # and 1 letter): 
 
-// Get text after the last "-"
-// If no "-", strip any leading symbols and "goal"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*goal\b\s*/i, "").trim()
+> [!success] My Goal
+> - [ ] 🎯Goal - Start sleeping 7hours in 1 month
+> - *Keep only one goal here, go to Area page to add another.*
 
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
-
-const lines = [
-  '---',
-  'priority: High',
-  'status: Active',
-  `create date: ${created}`,
-  'due: ',
-  '---',
-  '',
-  'Add tags here (start with # and 1 letter):',
-  '',
-  `> [!success] My Goal`,
-  `> - [ ] ${PREFIX}${core}`,
-  `>`,
-  `> - *Keep only one goal here, go to Area page to add another.*`,
-  '',
-]
-
-tR = lines.join('\n')
-%>
 ### 🏁Start Editing Here
 > [!tip] Step 1: 🚀Create projects
-> - Create projects that help to realize this goal.
+> - Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
 
 ### Type your projects here👇
 Hint: Create links to your project pages using prefix: `Project - `
-[[Project - Example1]]
-'
+[[🚀Project - Research healthy presleep rituals in 1wk]]
 '
 '
 [[🧠Mind Map]]
-
 
 > [!tip] Step 2: Work from the Project page
 > - Open each project note.
@@ -98,10 +71,8 @@ ___
 '
 '
 ___
-
 ### 🔗➡️Links:
 *Add Area links here if missing in backlinks.*
-'
 '
 '
 '
@@ -123,3 +94,4 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+

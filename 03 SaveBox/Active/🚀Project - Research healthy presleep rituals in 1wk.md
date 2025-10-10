@@ -1,42 +1,18 @@
-<%*
-/*
- * Project Template — hard-prefix + title-after-dash
- * Result checkbox: "🚀Project - <text after last dash in title>"
- */
+---
+priority: Medium
+status: Active
+create date: 2025-10-10
+due:
+---
 
-const PREFIX = "🚀Project - "
-const title  = (tp.file.title ?? "").trim()
+Tags (start with # and a letter):
 
-// Get text after the last "-"
-// If no "-", strip any leading symbols and "project"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim()
+> [!success] My Project
+> - [ ] 🚀Project - Research healthy presleep rituals in 1wk
+>
+> - Tick when done.
+> - ⚠️ Keep only one project here, go to Goal page to add another. 
 
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
-
-const lines = [
-  '---',
-  'priority: Medium',
-  'status: Active',
-  `create date: ${created}`,
-  'due: ',
-  '---',
-  '',
-  'Tags (start with # and a letter):',
-'',
-`> [!success] My Project`,
-`> - [ ] ${PREFIX}${core}`,
-`>`,
-`> - Tick when done.`,
-`> - ⚠️ Keep only one project here, go to Goal page to add another. `,
-``,
-]
-
-tR = lines.join('\n')
-%>
 ### 🏁Start Here
 > [!tip] Step 1: 📌Create tasks  
 > - Break into clear actions.  
@@ -102,4 +78,5 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+
 
