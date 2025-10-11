@@ -4,7 +4,7 @@ status: Active
 create date: 2025-10-10
 due: 2025-10-11
 duration_hours: "0.25"
-done: true
+done: false
 ---
 
 Tags (start with # and a letter):

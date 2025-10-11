@@ -1,5 +1,5 @@
 ---
-_goal_sync_state: true
+_goal_sync_state: false
 done: true
 status: Active
 priority: Medium
@@ -9,7 +9,7 @@ tags: []
 ---
 
 ### My Goal
-- [x] 🎯Goal - goal test1
+- [ ] 🎯Goal - goal test1
 
 
 ### 👷‍♂️Instructions:

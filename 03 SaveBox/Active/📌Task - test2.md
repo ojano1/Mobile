@@ -1,15 +1,15 @@
 ---
-_task_sync_state: false
+_task_sync_state: true
 done: false
 status: Active
 priority: Medium
 due: 2025-10-11
-duration_hours:
+duration_hours: "1"
 tags: []
 ---
 
 ### My Task
-- [ ] 📌Task - Task test2
+- [x] 📌Task - Task test2
 
 
 ### 👷‍♂️Instructions:

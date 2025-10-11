@@ -5,6 +5,94 @@
 '
 ___
 ### 📌My tasks for today
+~~~dataviewjs
+/******************************************************************
+ Daily Dashboard: Tasks + Habits
+ Filters:
+ - filenames containing "Task" or "Habit" (but not "!")
+ - folders not containing "Templates" or "Archive"
+ - Task → first checkbox under "My Task" with due = host date
+ - Habit → first checkbox under "Log" containing host date
+ Columns: Item | Priority | Time
+******************************************************************/
+
+// --- helpers ---
+const hostFile = dv.current().file;
+const hostDate = hostFile.name.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+if (!hostDate) { dv.paragraph("⚠️ Host note filename must include a date."); return; }
+
+const fmtDate = (s) => s?.toString()?.slice(0,10);
+const priorityRank = { "High": 1, "Medium": 2, "Low": 3, "": 4, undefined: 4, null: 4 };
+
+// --- collect candidates ---
+const all = dv.pages()
+  .where(p =>
+    /Task|Habit/i.test(p.file.name) &&
+    !p.file.name.includes("!") &&
+    !/Templates|Archive/i.test(p.file.folder)
+  );
+
+// --- extract first checkbox and filter by date ---
+let rows = [];
+
+for (let p of all) {
+  const fm = p.file.frontmatter ?? {};
+  const text = await app.vault.read(await app.vault.getAbstractFileByPath(p.file.path));
+
+  let heading = null;
+  if (/Task/i.test(p.file.name)) heading = "My Task";
+  else if (/Habit/i.test(p.file.name)) heading = "Log";
+  if (!heading) continue;
+
+  const range = (() => {
+    const re = new RegExp(`^#{1,6}\\s+${heading}\\s*$`, "gim");
+    const m = re.exec(text);
+    if (!m) return null;
+    const start = m.index + m[0].length;
+    const level = (m[0].match(/^#+/) || ["#"])[0].length;
+    const next = new RegExp(`^#{1,${level}}\\s+`, "gim");
+    next.lastIndex = start;
+    const n = next.exec(text);
+    return { start, end: n ? n.index : text.length };
+  })();
+
+  if (!range) continue;
+
+  const slice = text.slice(range.start, range.end);
+  const match = slice.match(/^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/m);
+  if (!match) continue;
+
+  const line = match[0];
+  const checked = /\[(x|X)\]/.test(line);
+  const clean = line.replace(/^[ \t>]*[-*]\s+\[( |x|X)\]\s*/, "").trim();
+
+  // date match
+  if (/Task/i.test(p.file.name)) {
+    const due = fmtDate(fm.due);
+    if (due !== hostDate) continue;
+  } else if (/Habit/i.test(p.file.name)) {
+    if (!line.includes(hostDate)) continue;
+  }
+
+  const prio = fm.priority ?? "";
+  const dur = fm.duration_hours ?? "";
+
+  rows.push({
+    file: p.file,
+    text: clean,
+    checked,
+    priority: prio,
+    duration: dur,
+    rank: priorityRank[prio]
+  });
+}
+
+// --- sorting ---
+rows.sort((a,b) => a.rank - b.rank || (a.duration || 0) - (b.duration || 
+~~~
+
+
+
 
 ~~~dataviewjs
 const ROOT = "03 SaveBox/Active";
