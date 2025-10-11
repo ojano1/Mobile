@@ -140,52 +140,10 @@ if (!tasks.length) {
 }
 ```
 ### ✍️Log
-<%*
-const today = tp.date.now("YYYY-MM-DD");
-const M = window.moment;
 
-// File info
-const active = app.workspace?.getActiveFile?.();
-const basename = active?.basename ?? tp.file.title ?? "";
+- [x] 🔁Habit - fasdfs 2025-10-11 ^2025-10-11
 
-// Core name from router if present, else from filename after " - "
-const core = (typeof ROUTER_CORE !== "undefined")
-  ? ROUTER_CORE
-  : (basename.split(" - ").slice(1).join(" - ") || basename);
 
-// ---- Weekday detection (EN + ID) ----
-const dayAliases = {
-  Monday:    ["monday","mon","senin","sen"],
-  Tuesday:   ["tuesday","tue","tues","selasa","sel"],
-  Wednesday: ["wednesday","wed","rabu","rab"],
-  Thursday:  ["thursday","thu","thur","thurs","kamis","kam"],
-  Friday:    ["friday","fri","jumat","jum'at","jum"],
-  Saturday:  ["saturday","sat","sabtu","sab"],
-  Sunday:    ["sunday","sun","minggu","ming","ahad","ahd"],
-};
-const aliasToKey = {};
-for (const [k, arr] of Object.entries(dayAliases)) for (const a of arr) aliasToKey[a.toLowerCase()] = k;
-
-const allAliases = Object.keys(aliasToKey).sort((a,b)=>b.length-a.length).join("|");
-const aliasRe = new RegExp(`\\b(?:${allAliases})\\b`, "gi");
-
-function extractWeekdays(str) {
-  const hits = str.match(aliasRe);
-  if (!hits) return [];
-  return [...new Set(hits.map(s => aliasToKey[s.toLowerCase()]).filter(Boolean))];
-}
-
-const weekdays = extractWeekdays(basename);                       // weekly if any days present
-const todayKey = aliasToKey[M().format("dddd").toLowerCase()] || M().format("dddd");
-
-// ---- Add only when scheduled ----
-const isWeekly = weekdays.length > 0;
-const scheduledToday = !isWeekly || weekdays.includes(todayKey);
-
-if (scheduledToday) {
-  tR += `\n- [ ] 🔁Habit - ${core} ${today} ^${today}\n`;
-} // else skip adding a line today
-%>
 
 
 
