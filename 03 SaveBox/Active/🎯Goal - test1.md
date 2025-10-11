@@ -1,6 +1,6 @@
 ---
-_goal_sync_state: false
-done: false
+_goal_sync_state: true
+done: true
 status: Active
 priority: Medium
 due: 2025-10-11
@@ -9,7 +9,7 @@ tags: []
 ---
 
 ### My Goal
-- [ ] 🎯Goal - goal test1
+- [x] 🎯Goal - goal test1
 
 
 ### 👷‍♂️Instructions:

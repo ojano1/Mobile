@@ -1,39 +1,16 @@
-<%*
-/*
- Project Template
- - Uses router rename ("🚀Project - <core>")
- - Adds `done` property (false by default)
- - Single main checkbox under “My Project” callout
-*/
+---
+_project_sync_state: false
+done: false
+status: Active
+priority: Medium
+due: 2025-10-11
+duration_hours:
+tags: []
+---
 
-const PREFIX  = "🚀Project - ";
-const title   = (tp.file.title ?? "").trim();
-const created = tp.file.creation_date("YYYY-MM-DD");
+### My Project
+- [ ] 🚀Project - test2
 
-// Extract text after last "-"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim();
-if (!core) core = "Untitled";
-
-const lines = [
-  "---",
-  "_project_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "",
-  "### My Project",
-  `- [ ] ${PREFIX}${core}`,
-  "",
-];
-
-tR = lines.join("\n");
-%>
 
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: 📌Create tasks  
@@ -103,4 +80,5 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+
 
