@@ -1,2 +1,9 @@
 # Ignore all of Obsidian’s system folder
-.obsidian/
+.obsidian/*
+
+# Allow the plugins folder
+!.obsidian/plugins/
+
+# Allow your custom plugin only
+!.obsidian/plugins/task-done-sync/
+!.obsidian/plugins/task-done-sync/**
