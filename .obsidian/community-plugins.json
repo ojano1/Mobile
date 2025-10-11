@@ -1,3 +1,9 @@
 [
-  "obsidian-git"
+  "obsidian-git",
+  "templater-obsidian",
+  "periodic-notes",
+  "dataview",
+  "metaedit",
+  "calendar",
+  "obsidian-tasks-plugin"
 ]

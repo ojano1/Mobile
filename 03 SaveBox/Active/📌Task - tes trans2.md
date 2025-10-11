@@ -3,13 +3,13 @@ priority: Medium
 status: Active
 create date: 2025-10-10
 due:
-duration_hours:
+duration_hours: "1"
 ---
 
-Tags (start with # and a letter):
+Tags (start with # and a letter): #Oct 
 
 > [!success] My Task
-> - [x] 📌Task - tes trans2 ^t-20251010-221643
+> - [x] 📌Task - tes trans2 ✅ 2025-10-11 ^t-20251010-221643
 >
 
 ### 👷‍♂️Instructions:

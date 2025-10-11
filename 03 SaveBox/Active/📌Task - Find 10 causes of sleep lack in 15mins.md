@@ -8,8 +8,10 @@ duration_hours: "1"
 
 Tags (start with # and a letter): #Oct
 
+### My Task
+
 > [!success] My Task
-> - [x] 📌Task - Find 10 causes of sleep lack in 15mins
+> - [ ] 📌Task - Find 10 causes of sleep lack in 15mins
 >
 [[🧠Mind Map]]
 ### 👷‍♂️Instructions:

@@ -1,25 +1,28 @@
 ---
 priority: Medium
 status: Active
-create date: 2025-10-10
+create date: 2025-10-11
 due: 2025-10-11
 duration_hours:
 done: true
+tags:
+  - due-today
+  - Oct
 ---
 
 Tags (start with # and a letter):
 
 > [!success] My Task
-> - [ ] 📌Task - new transclucent ^t-20251010-215724
+ - [ ] 📌Task - te4st 📅 ^t-20251011-095319
 >
-
+-
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add details  
 > - Describe, set duration_hours  
 > - Define expected output
 
 ### ✍️Description  
-''
+
 ___
 
 ### ✅Done Criteria  
@@ -28,6 +31,7 @@ ___
 
 ### 🔗➡️Links:
 *Add project links here if missing*
+[[🚀Project - Research healthy presleep rituals in 1wk]]
 
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs

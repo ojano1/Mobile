@@ -9,7 +9,7 @@ done: true
 Tags (start with # and a letter): #W41
 
 > [!success] My Task 👇
-> - [ ] 📌Task - mytask1
+> - [x] 📌Task - mytask1
 >
 > - Tick when done.
 > - ⚠️ Keep only one task here, go to Project page to add another.

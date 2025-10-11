@@ -8,7 +8,7 @@ due:
 My tags (Start with # and a letter):
 
 > [!success] My Project
-> - [x] 🚀Project - testaja1
+> - [ ] 🚀Project - testaja1
 >
 > - Tick when done.
 > - ⚠️ Keep only one project here, go to Goal page to add another. 

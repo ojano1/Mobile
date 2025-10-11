@@ -1,1 +1,7 @@
-{}
+{
+  "promptDelete": false,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "03 SaveBox/Active",
+  "attachmentFolderPath": "03 SaveBox/Attachment",
+  "alwaysUpdateLinks": true
+}
