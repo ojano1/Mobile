@@ -1,11 +1,10 @@
-// main.js — sync YAML `done` with first checkbox under My Task / My Project / My Goal
+// main.js — faster, more responsive sync for Task / Project / Goal
 // Flags: _task_sync_state, _project_sync_state, _goal_sync_state
 
 const { Plugin, MarkdownView } = require("obsidian");
 
 // ---------- utils ----------
 function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
-
 function findHeadingRange(src, name){
   const re = new RegExp(`^#{1,6}\\s+${escapeRegex(name)}\\s*$`, "gim");
   const m = re.exec(src);
@@ -17,9 +16,7 @@ function findHeadingRange(src, name){
   const n = next.exec(src);
   return { start, end: n ? n.index : src.length };
 }
-
 const boxRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
-
 function getFirstCheckbox(src, range){
   if (!range) return null;
   const slice = src.slice(range.start, range.end);
@@ -31,15 +28,12 @@ function getFirstCheckbox(src, range){
   const checked = /\[(x|X)\]/.test(m[0]);
   return { absStart, absEnd, line: m[0], checked };
 }
-
 function setChecked(line, v){ return line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]"); }
-
-function debounce(fn, wait, leading){
+function debounce(fn, wait){
   let t = null;
   return (...args)=>{
-    if (leading && !t) fn(...args);
     if (t) clearTimeout(t);
-    t = setTimeout(()=>{ if (!leading) fn(...args); t = null; }, wait);
+    t = setTimeout(()=>{ fn(...args); t = null; }, wait);
   };
 }
 
@@ -48,21 +42,30 @@ class TaskDoneSync extends Plugin {
   constructor(app, manifest){
     super(app, manifest);
     this.writing = new Set();
-    this.syncNow = debounce(()=>this.syncActive(), 200, true);
+    this.syncDebounced = debounce(()=>this.syncActive(), 120);
   }
 
   async onload(){
-    this.registerEvent(this.app.workspace.on("active-leaf-change", this.syncNow));
-    this.registerEvent(this.app.workspace.on("file-open", _ => this.syncNow()));
-    this.registerEvent(this.app.metadataCache.on("changed", (file)=>{
-      const active = this.app.workspace.getActiveFile();
-      if (active && file && file.path === active.path) this.syncNow();
-    }));
+    // Fires on most interactions
+    this.registerEvent(this.app.workspace.on("file-open",   _ => this.syncDebounced()));
+    this.registerEvent(this.app.workspace.on("active-leaf-change", _ => this.syncDebounced()));
+    this.registerEvent(this.app.workspace.on("layout-change", _ => this.syncDebounced()));
+    this.registerEvent(this.app.workspace.on("editor-change", (_editor, _view) => this.syncDebounced()));
+
+    // Fires on YAML/metadata updates and Reading view checkbox clicks
+    this.registerEvent(this.app.metadataCache.on("changed", (_file) => this.syncDebounced()));
+    this.registerEvent(this.app.metadataCache.on("resolved", _ => this.syncDebounced()));
+
+    // Fires on disk-level content changes, incl. Reading view checkbox toggles
+    this.registerEvent(this.app.vault.on("modify",   (_file) => this.syncDebounced()));
+    this.registerEvent(this.app.vault.on("rename",   (_f, _old) => this.syncDebounced()));
+    this.registerEvent(this.app.vault.on("create",   (_f) => this.syncDebounced()));
   }
 
   getEditorInfo(file){
     const md = this.app.workspace.getActiveViewOfType(MarkdownView);
-    const inEdit = !!md && md.file?.path === file.path && md.getMode() !== "preview";
+    const isActive = !!md && md.file?.path === file.path;
+    const inEdit = isActive && md.getMode() !== "preview";
     return { editor: md?.editor, inEdit };
   }
 
@@ -78,7 +81,6 @@ class TaskDoneSync extends Plugin {
     const fm = cache.frontmatter ?? {};
     if (!fm) return;
 
-    // One controlling section per note.
     const scopes = [
       { heading: "My Task",    flag: "_task_sync_state" },
       { heading: "My Project", flag: "_project_sync_state" },
@@ -106,20 +108,18 @@ class TaskDoneSync extends Plugin {
       const boxChanged  = boxNow !== prevState;
 
       if (boxChanged){
-        // Checkbox wins → update YAML
         await this.writeFM(file, { done: !!boxNow, [scope.flag]: !!boxNow });
         return;
       }
 
       if (yamlChanged){
-        // YAML wins → update checkbox
         const newLine = setChecked(box.line, !!yamlDone);
         await this.replaceBody(file, text, box.absStart, box.absEnd, newLine);
         await this.writeFM(file, { [scope.flag]: !!yamlDone });
         return;
       }
 
-      // Already in sync, stop.
+      // Already in sync for this scope. Stop.
       return;
     }
   }
@@ -130,9 +130,7 @@ class TaskDoneSync extends Plugin {
       await this.app.fileManager.processFrontMatter(file, (m)=>{
         for (const k of Object.keys(patch)) m[k] = patch[k];
       });
-    } finally {
-      this.writing.delete(file.path);
-    }
+    } finally { this.writing.delete(file.path); }
   }
 
   async replaceBody(file, src, start, end, replacement){
@@ -148,9 +146,7 @@ class TaskDoneSync extends Plugin {
         const next = src.slice(0, start) + replacement + src.slice(end);
         if (next !== src) await this.app.vault.modify(file, next);
       }
-    } finally {
-      this.writing.delete(file.path);
-    }
+    } finally { this.writing.delete(file.path); }
   }
 }
 
