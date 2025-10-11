@@ -1,0 +1,13 @@
+{
+  "name": "task-done-sync",
+  "private": true,
+  "scripts": {
+    "build": "esbuild src/main.ts --bundle --outfile=main.js --format=cjs --platform=node --external:obsidian --external:electron",
+    "dev": "npm run build -- --sourcemap"
+  },
+  "devDependencies": {
+    "esbuild": "^0.21.0",
+    "@types/obsidian": "^1.4.0",
+    "typescript": "^5.4.0"
+  }
+}
