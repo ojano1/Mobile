@@ -1,20 +1,63 @@
-# Ignore Obsidian system folder
-.obsidian/
+# ===============================
+# Obsidian vault Git ignore rules
+# ===============================
 
-# Optional: ignore cache and trash
+# Ignore the whole Obsidian system folder
+.obsidian/*
+
+# Allow plugins folder and your custom plugin
+!.obsidian/plugins/
+!.obsidian/plugins/task-done-sync/
+!.obsidian/plugins/task-done-sync/**
+
+# Keep only runtime files from your plugin
+# (Obsidian Mobile needs these)
+#   - main.js
+#   - manifest.json
+#   - styles.css (optional)
+# Block common dev/build files inside any plugin
+.obsidian/plugins/*/node_modules/
+.obsidian/plugins/*/src/
+.obsidian/plugins/*/tsconfig.json
+.obsidian/plugins/*/tsconfig*.json
+.obsidian/plugins/*/package.json
+.obsidian/plugins/*/package-lock.json
+.obsidian/plugins/*/pnpm-lock.yaml
+.obsidian/plugins/*/yarn.lock
+.obsidian/plugins/*/*.ts
+.obsidian/plugins/*/*.map
+.obsidian/plugins/*/*.tsbuildinfo
+.obsidian/plugins/*/.git/
+
+# If you want to be extra strict for your plugin, uncomment these:
+.obsidian/plugins/task-done-sync/main.ts
+.obsidian/plugins/task-done-sync/package.json
+.obsidian/plugins/task-done-sync/*.map
+
+# Ignore other Obsidian-local configs/themes you don’t want in Git
+.obsidian/workspace.json
+.obsidian/app.json
+.obsidian/appearance.json
+.obsidian/themes/
+.obsidian/snippets/
+.obsidian/backups/
+
+# Optional: ignore caches and trash
 .obsidian-cache/
 .trash/
 .excalidraw/
 
-# Ignore mobile-only config files
+# Mobile-only config
 .obsidian-mobile.json
 
-# Ignore iCloud metadata
+# OS junk
 .DS_Store
 .AppleDouble
 .LSOverride
-
-# Ignore temporary files
 Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Temporary and logs
 *.tmp
 *.log
