@@ -120,7 +120,7 @@ if (!tasks.length) {
 ### Log
 
 - [ ] 🔁Habit - subuh 2025-10-10 ^2025-10-10
-- [ ] 🔁Habit - subuh 2025-10-11 ^2025-10-11
+- [x] 🔁Habit - subuh 2025-10-11 ^2025-10-11
 - [ ] 🔁Habit - subuh 2025-10-09 ^2025-10-09
 - [x] 📅Habit - Subuh 2025-10-08
 - [x] 📅Habit - Subuh 2025-10-07
