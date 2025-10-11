@@ -1,6 +1,7 @@
 ---
 done: false
 _goal_sync_state: false
+_project_sync_state: false
 ---
 // main.js — faster, more responsive sync for Task / Project / Goal
 // Flags: _task_sync_state, _project_sync_state, _goal_sync_state
@@ -56,6 +57,15 @@ class TaskDoneSync extends Plugin {
     this.registerEvent(this.app.workspace.on("layout-change", _ => this.syncDebounced()));
     this.registerEvent(this.app.workspace.on("editor-change", (_editor, _view) => this.syncDebounced()));
 
+this.registerEvent(
+  this.app.vault.on("modify", file => {
+    // prevent “modified externally” notice spam for our own writes
+    if (this.writing.has(file.path)) {
+      // silence Obsidian's merge notice
+      if (app?.notifier?.hideAll) app.notifier.hideAll();
+    }
+  })
+);
     // Fires on YAML/metadata updates and Reading view checkbox clicks
     this.registerEvent(this.app.metadataCache.on("changed", (_file) => this.syncDebounced()));
     this.registerEvent(this.app.metadataCache.on("resolved", _ => this.syncDebounced()));
