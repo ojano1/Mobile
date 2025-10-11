@@ -3,15 +3,16 @@ done: false
 _goal_sync_state: false
 _project_sync_state: false
 ---
-// main.js — faster, more responsive sync for Task / Project / Goal
-// Flags: _task_sync_state, _project_sync_state, _goal_sync_state
+// main.js — sync YAML `done` with first checkbox under My Task / My Project / My Goal
+// Ignores Area / Note / Habit notes entirely
+// Applies the 2s "new file" delay ONLY to Task/Project/Goal notes
 
 const { Plugin, MarkdownView } = require("obsidian");
 
-// ---------- utils ----------
-function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+// ---------- helpers ----------
+function escapeRx(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 function findHeadingRange(src, name){
-  const re = new RegExp(`^#{1,6}\\s+${escapeRegex(name)}\\s*$`, "gim");
+  const re = new RegExp(`^#{1,6}\\s+${escapeRx(name)}\\s*$`, "gim");
   const m = re.exec(src);
   if (!m) return null;
   const start = m.index + m[0].length;
@@ -34,46 +35,45 @@ function getFirstCheckbox(src, range){
   return { absStart, absEnd, line: m[0], checked };
 }
 function setChecked(line, v){ return line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]"); }
+
 function debounce(fn, wait){
   let t = null;
-  return (...args)=>{
-    if (t) clearTimeout(t);
-    t = setTimeout(()=>{ fn(...args); t = null; }, wait);
-  };
+  return (...args)=>{ if (t) clearTimeout(t); t = setTimeout(()=>{ t = null; fn(...args); }, wait); };
 }
+
+// ----- template/race guards -----
+const SKIP_NEWFILE_MS = 2000;
+function isTemplatePath(path){ return /(^|\/)(templates?|Templates?)(\/|$)/.test(path); }
+function isTemplateFM(fm){ return fm?.template === true || fm?.is_template === true || fm?.type === "template"; }
+function hasTemplaterTags(text){ return /<%[\s\S]*?%>/.test(text); }
+function isTooNew(file){ const c = file?.stat?.ctime ?? 0; return Date.now() - c < SKIP_NEWFILE_MS; }
 
 // ---------- plugin ----------
 class TaskDoneSync extends Plugin {
   constructor(app, manifest){
     super(app, manifest);
     this.writing = new Set();
-    this.syncDebounced = debounce(()=>this.syncActive(), 120);
+    this.syncDebounced = debounce(()=>this.syncActive(), 150);
   }
 
   async onload(){
-    // Fires on most interactions
+    // responsiveness
     this.registerEvent(this.app.workspace.on("file-open",   _ => this.syncDebounced()));
     this.registerEvent(this.app.workspace.on("active-leaf-change", _ => this.syncDebounced()));
     this.registerEvent(this.app.workspace.on("layout-change", _ => this.syncDebounced()));
     this.registerEvent(this.app.workspace.on("editor-change", (_editor, _view) => this.syncDebounced()));
-
-this.registerEvent(
-  this.app.vault.on("modify", file => {
-    // prevent “modified externally” notice spam for our own writes
-    if (this.writing.has(file.path)) {
-      // silence Obsidian's merge notice
-      if (app?.notifier?.hideAll) app.notifier.hideAll();
-    }
-  })
-);
-    // Fires on YAML/metadata updates and Reading view checkbox clicks
     this.registerEvent(this.app.metadataCache.on("changed", (_file) => this.syncDebounced()));
     this.registerEvent(this.app.metadataCache.on("resolved", _ => this.syncDebounced()));
-
-    // Fires on disk-level content changes, incl. Reading view checkbox toggles
     this.registerEvent(this.app.vault.on("modify",   (_file) => this.syncDebounced()));
     this.registerEvent(this.app.vault.on("rename",   (_f, _old) => this.syncDebounced()));
     this.registerEvent(this.app.vault.on("create",   (_f) => this.syncDebounced()));
+
+    // hide “modified externally” popup for our writes
+    this.registerEvent(this.app.vault.on("modify", file => {
+      if (this.writing.has(file.path)) {
+        if (this.app?.notifier?.hideAll) this.app.notifier.hideAll();
+      }
+    }));
   }
 
   getEditorInfo(file){
@@ -86,14 +86,25 @@ this.registerEvent(
   async syncActive(){
     const file = this.app.workspace.getActiveFile();
     if (!file) return;
-    if (this.writing.has(file.path)) return;
-
-    const { editor, inEdit } = this.getEditorInfo(file);
-    const text = inEdit ? editor.getValue() : await this.app.vault.read(file);
+    if (isTemplatePath(file.path)) return;
 
     const cache = this.app.metadataCache.getFileCache(file) ?? {};
     const fm = cache.frontmatter ?? {};
-    if (!fm) return;
+    if (isTemplateFM(fm)) return;
+
+    const { editor, inEdit } = this.getEditorInfo(file);
+    const text = inEdit && editor ? editor.getValue() : await this.app.vault.read(file);
+    if (!text) return;
+    if (hasTemplaterTags(text)) return;
+
+    // act ONLY on Task / Project / Goal notes
+    const isTarget = /^#{1,6}\s+My\s+(Task|Project|Goal)\s*$/im.test(text);
+    if (!isTarget) return; // ignore Area / Note / Habit / anything else
+
+    // apply the new-file delay ONLY to target notes
+    if (isTooNew(file)) return;
+
+    if (this.writing.has(file.path)) return;
 
     const scopes = [
       { heading: "My Task",    flag: "_task_sync_state" },
@@ -108,11 +119,11 @@ this.registerEvent(
       const box = getFirstCheckbox(text, range);
       if (!box) continue;
 
-      const yamlDone = typeof fm.done === "boolean" ? fm.done : null;
+      const yamlDone  = typeof fm.done === "boolean" ? fm.done : null;
       const prevState = typeof fm[scope.flag] === "boolean" ? fm[scope.flag] : null;
       const boxNow = box.checked;
 
-      // First run → adopt checkbox
+      // first run → adopt checkbox
       if (prevState === null){
         await this.writeFM(file, { done: !!boxNow, [scope.flag]: !!boxNow });
         return;
@@ -133,8 +144,7 @@ this.registerEvent(
         return;
       }
 
-      // Already in sync for this scope. Stop.
-      return;
+      return; // already in sync for this scope
     }
   }
 
