@@ -1,16 +1,16 @@
 ---
-_task_sync_state: true
+_task_sync_state: false
 priority: Medium
 status: Active
 created: 2025-10-11
-due: 2025-10-11
+due:
 duration_hours:
-done: true
+done: false
 tags: []
 ---
 
 ### My Task
-- [x] 📌Task - Task fjrhfb
+- [ ] 📌Task - task fasfaf
 
 
 ### 👷‍♂️Instructions:
@@ -43,6 +43,7 @@ const backlinks = dv.pages()
 if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
 else dv.paragraph("None");
 ~~~
+
 
 ```dataviewjs
 // Bidirectional silent sync between YAML `done`
@@ -154,6 +155,5 @@ if (newText !== text) {
   await app.vault.modify(file, newText);
   app.workspace.trigger("dataview:refresh-views");
 }
-
 
 ```

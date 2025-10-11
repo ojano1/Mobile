@@ -66,12 +66,15 @@ const backlinks = dv.pages()
 if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
 else dv.paragraph("None");
 ~~~
-
 ```dataviewjs
 // Bidirectional silent sync between YAML `done`
 // and the first checkbox under "My Task".
-// Uses `_task_sync_state` in YAML for memory.
-// No output. No extra inserts.
+// Uses _task_sync_state for internal memory.
+// Safe for Force Note View (runs only in Source mode).
+
+// --- Safety guard: skip if not in Source mode ---
+const mdView = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
+if (!mdView || mdView.getMode() !== "source") return;
 
 const file = app.workspace.getActiveFile();
 if (!file) return;
@@ -93,19 +96,15 @@ const replaceInFM = (src, nextDone, nextState) => {
   if (!fmMatch) return src;
   let block = fmMatch[0];
 
-  // Update or insert "done"
-  if (nextDone !== null) {
-    block = /^\s*done:\s*/m.test(block)
-      ? block.replace(/^\s*done:\s*.*/m, `done: ${nextDone}`)
-      : block.replace(/\n---\s*$/, `\ndone: ${nextDone}\n---`);
-  }
+  const updateOrInsert = (b, key, value) => {
+    const re = new RegExp(`^\\s*${key}:\\s*.*$`, "m");
+    return re.test(b)
+      ? b.replace(re, `${key}: ${value}`)
+      : b.replace(/\n---\s*$/, `\n${key}: ${value}\n---`);
+  };
 
-  // Update or insert "_task_sync_state"
-  if (typeof nextState === "boolean") {
-    block = /^\s*_task_sync_state:\s*/m.test(block)
-      ? block.replace(/^\s*_task_sync_state:\s*.*/m, `_task_sync_state: ${nextState}`)
-      : block.replace(/\n---\s*$/, `\n_task_sync_state: ${nextState}\n---`);
-  }
+  if (nextDone !== null) block = updateOrInsert(block, "done", nextDone);
+  if (typeof nextState === "boolean") block = updateOrInsert(block, "_task_sync_state", nextState);
 
   return src.replace(fmMatch[0], block);
 };

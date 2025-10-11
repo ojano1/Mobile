@@ -1,16 +1,16 @@
 ---
-_task_sync_state: true
+_task_sync_state: false
 priority: Medium
 status: Active
 created: 2025-10-11
-due: 2025-10-11
+due:
 duration_hours:
-done: true
+done: false
 tags: []
 ---
 
 ### My Task
-- [x] 📌Task - Task fjrhfb
+- [ ] 📌Task - task asfasfda
 
 
 ### 👷‍♂️Instructions:
@@ -43,12 +43,15 @@ const backlinks = dv.pages()
 if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
 else dv.paragraph("None");
 ~~~
-
 ```dataviewjs
 // Bidirectional silent sync between YAML `done`
 // and the first checkbox under "My Task".
-// Keeps state in _task_sync_state.
-// Includes minimal debounce + forced Dataview refresh for responsiveness.
+// Uses _task_sync_state for internal memory.
+// Safe for Force Note View (runs only in Source mode).
+
+// --- Safety guard: skip if not in Source mode ---
+const mdView = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
+if (!mdView || mdView.getMode() !== "source") return;
 
 const file = app.workspace.getActiveFile();
 if (!file) return;
@@ -64,7 +67,7 @@ const prevState =
 
 const text = await app.vault.read(file);
 
-// --- helpers ---
+// --- Helpers ---
 const replaceInFM = (src, nextDone, nextState) => {
   const fmMatch = src.match(/^---\n[\s\S]*?\n---/);
   if (!fmMatch) return src;
@@ -95,7 +98,7 @@ const findHeadingRange = (src, name) => {
   return { start, end: n ? n.index : src.length };
 };
 
-// support indented or quoted checkboxes
+// allow "> - [ ]" etc.
 const taskRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
 
 const getFirstCheckbox = (src, range) => {
@@ -112,7 +115,7 @@ const getFirstCheckbox = (src, range) => {
 const setTaskChecked = (line, v) =>
   line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
 
-// --- main ---
+// --- Main ---
 if (!hasFM) return;
 
 const range = findHeadingRange(text, "My Task");
@@ -123,13 +126,10 @@ if (!task) return;
 
 const taskNow = task.checked;
 
-// initial run → adopt checkbox
+// first run → adopt checkbox
 if (prevState === null) {
   const updated = replaceInFM(text, taskNow, taskNow);
-  if (updated !== text) {
-    await app.vault.modify(file, updated);
-    app.workspace.trigger("dataview:refresh-views");
-  }
+  if (updated !== text) await app.vault.modify(file, updated);
   return;
 }
 
@@ -148,12 +148,7 @@ if (taskChanged) {
   newText = replaceInFM(newText, yamlDone, yamlDone);
 }
 
-// Apply change with minimal debounce and forced refresh
-if (newText !== text) {
-  await new Promise(r => setTimeout(r, 100)); // small delay to batch writes
-  await app.vault.modify(file, newText);
-  app.workspace.trigger("dataview:refresh-views");
-}
-
+if (newText !== text) await app.vault.modify(file, newText);
 
 ```
+
