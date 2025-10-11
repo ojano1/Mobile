@@ -1,0 +1,1 @@
+npx esbuild main.ts --bundle --outfile=main.js --format=cjs
