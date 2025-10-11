@@ -20,8 +20,7 @@ const lines = [
   "---",
   "_task_sync_state: false",
   "priority: Medium",           // High | Medium | Low
-  "status: Active",             // Active | On Hold | Done
-  `created: ${created}`,
+  "status: Active",             // Active | Archived
   "due: ",                      // fill later
   "duration_hours: ",           // number
   "done: false",                // editable checkbox in Properties view
