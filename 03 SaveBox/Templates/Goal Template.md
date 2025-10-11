@@ -17,12 +17,12 @@ const core   = (m ? m[2] : title).trim();
 
 const lines = [
   "---",
-  "_task_sync_state: false",
-  "priority: Medium",           // High | Medium | Low
+  "_goal_sync_state: false",
+  "done: false",                // editable checkbox in Properties view
   "status: Active",             // Active | Archived
+  "priority: Medium",           // High | Medium | Low
   "due: ",                      // fill later
   "duration_hours: ",           // number
-  "done: false",                // editable checkbox in Properties view
   "tags: []",                   // YAML array
   "---",
   "",
@@ -120,15 +120,14 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
-```dataviewjs
-// Bidirectional silent sync between YAML `done`
-// and the first checkbox under "My Task".
-// Uses _task_sync_state for internal memory.
-// Safe for Force Note View (runs only in Source mode).
 
-// --- Safety guard: skip if not in Source mode ---
+```dataviewjs
+// YAML `done` ↔ first checkbox under "My Goal"
+// Internal flag: _goal_sync_state
+// Runs in any Markdown mode
+
 const mdView = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
-if (!mdView || mdView.getMode() !== "source") return;
+if (!mdView) return;
 
 const file = app.workspace.getActiveFile();
 if (!file) return;
@@ -137,51 +136,31 @@ const cache = app.metadataCache.getFileCache(file) ?? {};
 const fm = cache.frontmatter ?? {};
 const hasFM = !!cache.frontmatter;
 
-const yamlDone =
-  hasFM && typeof fm.done === "boolean" ? fm.done : null;
-const prevState =
-  hasFM && typeof fm._task_sync_state === "boolean" ? fm._task_sync_state : null;
+const yamlDone = hasFM && typeof fm.done === "boolean" ? fm.done : null;
+const prevState = hasFM && typeof fm._goal_sync_state === "boolean" ? fm._goal_sync_state : null;
 
 const text = await app.vault.read(file);
 
-// --- Helpers ---
-const replaceInFM = (src, nextDone, nextState) => {
-  const fmMatch = src.match(/^---\n[\s\S]*?\n---/);
-  if (!fmMatch) return src;
-  let block = fmMatch[0];
-
-  const updateOrInsert = (b, key, value) => {
-    const re = new RegExp(`^\\s*${key}:\\s*.*$`, "m");
-    return re.test(b)
-      ? b.replace(re, `${key}: ${value}`)
-      : b.replace(/\n---\s*$/, `\n${key}: ${value}\n---`);
-  };
-
-  if (nextDone !== null) block = updateOrInsert(block, "done", nextDone);
-  if (typeof nextState === "boolean") block = updateOrInsert(block, "_task_sync_state", nextState);
-
-  return src.replace(fmMatch[0], block);
-};
-
+// Helpers
 const findHeadingRange = (src, name) => {
   const re = new RegExp(`^#{1,6}\\s+${name}\\s*$`, "gim");
   const m = re.exec(src);
   if (!m) return null;
   const start = m.index + m[0].length;
-  const level = m[0].match(/^#+/)[0].length;
+  const level = (m[0].match(/^#+/) || ["#"])[0].length;
   const next = new RegExp(`^#{1,${level}}\\s+`, "gim");
   next.lastIndex = start;
   const n = next.exec(src);
   return { start, end: n ? n.index : src.length };
 };
 
-// allow "> - [ ]" etc.
-const taskRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
+const boxRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
 
 const getFirstCheckbox = (src, range) => {
   if (!range) return null;
   const slice = src.slice(range.start, range.end);
-  const m = taskRe.exec(slice);
+  boxRe.lastIndex = 0;
+  const m = boxRe.exec(slice);
   if (!m) return null;
   const absStart = range.start + m.index;
   const absEnd = absStart + m[0].length;
@@ -189,42 +168,47 @@ const getFirstCheckbox = (src, range) => {
   return { absStart, absEnd, line: m[0], checked };
 };
 
-const setTaskChecked = (line, v) =>
-  line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
+const setChecked = (line, v) => line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
 
-// --- Main ---
+// Main
 if (!hasFM) return;
 
-const range = findHeadingRange(text, "My Task");
+const range = findHeadingRange(text, "My Goal");
 if (!range) return;
 
-const task = getFirstCheckbox(text, range);
-if (!task) return;
+const cb = getFirstCheckbox(text, range);
+if (!cb) return;
 
-const taskNow = task.checked;
+const boxNow = cb.checked;
 
-// first run → adopt checkbox
+// First run adopts checkbox
 if (prevState === null) {
-  const updated = replaceInFM(text, taskNow, taskNow);
-  if (updated !== text) await app.vault.modify(file, updated);
+  await app.fileManager.processFrontMatter(file, f => {
+    f.done = !!boxNow;
+    f._goal_sync_state = !!boxNow;
+  });
   return;
 }
 
 const yamlChanged = yamlDone !== null && yamlDone !== prevState;
-const taskChanged = taskNow !== prevState;
+const boxChanged = boxNow !== prevState;
 
-let newText = text;
-
-if (taskChanged) {
-  // checkbox wins
-  newText = replaceInFM(newText, taskNow, taskNow);
-} else if (yamlChanged) {
-  // YAML wins
-  const newLine = setTaskChecked(task.line, yamlDone);
-  newText = text.slice(0, task.absStart) + newLine + text.slice(task.absEnd);
-  newText = replaceInFM(newText, yamlDone, yamlDone);
+if (boxChanged) {
+  // Checkbox wins → update YAML
+  await app.fileManager.processFrontMatter(file, f => {
+    f.done = !!boxNow;
+    f._goal_sync_state = !!boxNow;
+  });
+  return;
 }
 
-if (newText !== text) await app.vault.modify(file, newText);
-
+if (yamlChanged) {
+  // YAML wins → update checkbox
+  const newLine = setChecked(cb.line, !!yamlDone);
+  const newText = text.slice(0, cb.absStart) + newLine + text.slice(cb.absEnd);
+  if (newText !== text) await app.vault.modify(file, newText);
+  await app.fileManager.processFrontMatter(file, f => {
+    f._goal_sync_state = !!yamlDone;
+  });
+}
 ```

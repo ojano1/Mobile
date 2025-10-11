@@ -1,16 +1,15 @@
 ---
-priority: Medium
+_project_sync_state: false
+done: false
 status: Active
-created: 2025-10-11
-due:
-done: true
+priority: Medium
+due: 2025-10-11
+duration_hours:
 tags: []
-_task_sync_state: false
-_project_sync_state: true
 ---
 
 ### My Project
-- [x] 🚀Project - sglkdjg
+- [ ] 🚀Project - test1
 
 
 ### 👷‍♂️Instructions:
@@ -83,10 +82,12 @@ if (backlinks.length) {
 ~~~
 
 ```dataviewjs
-// Bidirectional silent sync between YAML `done`
-// and the first checkbox under "My Project".
-// Uses _task_sync_state for internal memory.
-// Forces Dataview refresh for responsiveness.
+// YAML `done` ↔ first checkbox under "My Project"
+// Internal flag: _project_sync_state
+// Runs in any Markdown mode
+
+const mdView = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
+if (!mdView) return;
 
 const file = app.workspace.getActiveFile();
 if (!file) return;
@@ -95,51 +96,31 @@ const cache = app.metadataCache.getFileCache(file) ?? {};
 const fm = cache.frontmatter ?? {};
 const hasFM = !!cache.frontmatter;
 
-const yamlDone =
-  hasFM && typeof fm.done === "boolean" ? fm.done : null;
-const prevState =
-  hasFM && typeof fm._task_sync_state === "boolean" ? fm._task_sync_state : null;
+const yamlDone = hasFM && typeof fm.done === "boolean" ? fm.done : null;
+const prevState = hasFM && typeof fm._project_sync_state === "boolean" ? fm._project_sync_state : null;
 
 const text = await app.vault.read(file);
 
-// --- helpers ---
-const replaceInFM = (src, nextDone, nextState) => {
-  const fmMatch = src.match(/^---\n[\s\S]*?\n---/);
-  if (!fmMatch) return src;
-  let block = fmMatch[0];
-
-  const updateOrInsert = (b, key, value) => {
-    const re = new RegExp(`^\\s*${key}:\\s*.*$`, "m");
-    return re.test(b)
-      ? b.replace(re, `${key}: ${value}`)
-      : b.replace(/\n---\s*$/, `\n${key}: ${value}\n---`);
-  };
-
-  if (nextDone !== null) block = updateOrInsert(block, "done", nextDone);
-  if (typeof nextState === "boolean") block = updateOrInsert(block, "_task_sync_state", nextState);
-
-  return src.replace(fmMatch[0], block);
-};
-
+// Helpers
 const findHeadingRange = (src, name) => {
   const re = new RegExp(`^#{1,6}\\s+${name}\\s*$`, "gim");
   const m = re.exec(src);
   if (!m) return null;
   const start = m.index + m[0].length;
-  const level = m[0].match(/^#+/)[0].length;
+  const level = (m[0].match(/^#+/) || ["#"])[0].length;
   const next = new RegExp(`^#{1,${level}}\\s+`, "gim");
   next.lastIndex = start;
   const n = next.exec(src);
   return { start, end: n ? n.index : src.length };
 };
 
-// allow blockquote / indent before "- [ ]"
-const taskRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
+const boxRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
 
 const getFirstCheckbox = (src, range) => {
   if (!range) return null;
   const slice = src.slice(range.start, range.end);
-  const m = taskRe.exec(slice);
+  boxRe.lastIndex = 0;
+  const m = boxRe.exec(slice);
   if (!m) return null;
   const absStart = range.start + m.index;
   const absEnd = absStart + m[0].length;
@@ -147,50 +128,48 @@ const getFirstCheckbox = (src, range) => {
   return { absStart, absEnd, line: m[0], checked };
 };
 
-const setTaskChecked = (line, v) =>
-  line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
+const setChecked = (line, v) => line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
 
-// --- main ---
+// Main
 if (!hasFM) return;
 
 const range = findHeadingRange(text, "My Project");
 if (!range) return;
 
-const task = getFirstCheckbox(text, range);
-if (!task) return;
+const cb = getFirstCheckbox(text, range);
+if (!cb) return;
 
-const taskNow = task.checked;
+const boxNow = cb.checked;
 
-// first run → adopt checkbox
+// First run adopts checkbox
 if (prevState === null) {
-  const updated = replaceInFM(text, taskNow, taskNow);
-  if (updated !== text) {
-    await app.vault.modify(file, updated);
-    app.workspace.trigger("dataview:refresh-views");
-  }
+  await app.fileManager.processFrontMatter(file, f => {
+    f.done = !!boxNow;
+    f._project_sync_state = !!boxNow;
+  });
   return;
 }
 
 const yamlChanged = yamlDone !== null && yamlDone !== prevState;
-const taskChanged = taskNow !== prevState;
+const boxChanged = boxNow !== prevState;
 
-let newText = text;
-
-if (taskChanged) {
-  // checkbox wins
-  newText = replaceInFM(newText, taskNow, taskNow);
-} else if (yamlChanged) {
-  // YAML wins
-  const newLine = setTaskChecked(task.line, yamlDone);
-  newText = text.slice(0, task.absStart) + newLine + text.slice(task.absEnd);
-  newText = replaceInFM(newText, yamlDone, yamlDone);
+if (boxChanged) {
+  // Checkbox wins → update YAML
+  await app.fileManager.processFrontMatter(file, f => {
+    f.done = !!boxNow;
+    f._project_sync_state = !!boxNow;
+  });
+  return;
 }
 
-// Apply change with minimal debounce and forced refresh
-if (newText !== text) {
-  await new Promise(r => setTimeout(r, 100)); // short delay for smoothness
-  await app.vault.modify(file, newText);
-  app.workspace.trigger("dataview:refresh-views");
+if (yamlChanged) {
+  // YAML wins → update checkbox
+  const newLine = setChecked(cb.line, !!yamlDone);
+  const newText = text.slice(0, cb.absStart) + newLine + text.slice(cb.absEnd);
+  if (newText !== text) await app.vault.modify(file, newText);
+  await app.fileManager.processFrontMatter(file, f => {
+    f._project_sync_state = !!yamlDone;
+  });
 }
 
 ```

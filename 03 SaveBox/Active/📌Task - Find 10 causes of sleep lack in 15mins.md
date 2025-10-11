@@ -4,6 +4,8 @@ status: Active
 create date: 2025-10-10
 due:
 duration_hours: "1"
+done: false
+_task_sync_state: false
 ---
 
 Tags (start with # and a letter): #Oct

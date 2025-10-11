@@ -1,69 +1,60 @@
-<%*
-/*
- Project Template
- - Uses router rename ("🚀Project - <core>")
- - Adds `done` property (false by default)
- - Single main checkbox under “My Project” callout
-*/
+---
+_goal_sync_state: true
+done: true
+status: Active
+priority: Medium
+due: 2025-10-11
+duration_hours:
+tags: []
+---
 
-const PREFIX  = "🚀Project - ";
-const title   = (tp.file.title ?? "").trim();
-const created = tp.file.creation_date("YYYY-MM-DD");
+### My Goal
+- [x] 🎯Goal - goal test1
 
-// Extract text after last "-"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim();
-if (!core) core = "Untitled";
-
-const lines = [
-  "---",
-  "_project_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "",
-  "### My Project",
-  `- [ ] ${PREFIX}${core}`,
-  "",
-];
-
-tR = lines.join("\n");
-%>
 
 ### 👷‍♂️Instructions:
-> [!tip] Step 1: 📌Create tasks  
-> - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).
-> - Examples: “Draft spec 1 page in 1 hour”, “Email vendor shortlist in 30mins”, “Set review meeting for Tue in 15mins”.
-> - Create links to your task pages using prefix `Task - `  
+> [!tip] Step 1: 🚀Create projects to realize this goal.
+> - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
+> - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
+> - Create links to your project page using prefix `Project - `
 
-#### Type your tasks here👇  
-[[Task - example]]
+### Type your projects here👇
+[[Project - Example1]]
 '
 '
 '
 [[🧠Mind Map]]
-> [!tip] Step 2: Open task pages and confirm creation.
-#### All tasks linked to this project:
-~~~dataview
-LIST
-FROM ""
-WHERE contains(file.name, "Task")
-AND (
-  startswith(file.folder, "01 Definition")
-  OR startswith(file.folder, "02 Execution")
-  OR startswith(file.folder, "03 SaveBox/Active")
-  OR startswith(file.folder, "04 Output")
-)
-AND (
-  contains(this.file.outlinks, file.link)
-  OR contains(file.outlinks, this.file.link)
-)
-SORT file.name ASC
+
+
+> [!tip] Step 2: Work from the Project page
+> - Open each project note.
+> - Create tasks **in the project page**.
+
+### All the projects linked to this goals:
+~~~dataviewjs
+const projects = dv.pages("")
+  .where(p =>
+    p.file.name.includes("Project") &&
+    !p.file.folder.includes("Archive") &&
+    !p.file.folder.includes("Template") &&
+    (
+      p.file.folder.startsWith("01 Definition") ||
+      p.file.folder.startsWith("02 Execution") ||
+      p.file.folder.startsWith("03 SaveBox/Active") ||
+      p.file.folder.startsWith("04 Output")
+    ) &&
+    (
+      dv.current().file.outlinks.includes(p.file.link) ||
+      p.file.outlinks.includes(dv.current().file.link)
+    )
+  )
+  .sort(p => p.file.name, "asc");
+
+if (projects.length) {
+  dv.list(projects.map(p => p.file.link));
+} else {
+  dv.paragraph("Start adding projects! 😊");
+}
 ~~~
 > [!tip] Step 3: ✅(Optional) Create done criteria
 > - Outcome, amount, or result
@@ -82,9 +73,13 @@ ___
 '
 '
 ___
-### 🔗➡️Links  :
-*Add goal links here if missing in the backlinks*
 
+### 🔗➡️Links:
+*Add Area links here if none in backlinks section.*
+'
+'
+'
+'
 ___
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs
@@ -105,8 +100,8 @@ if (backlinks.length) {
 ~~~
 
 ```dataviewjs
-// YAML `done` ↔ first checkbox under "My Project"
-// Internal flag: _project_sync_state
+// YAML `done` ↔ first checkbox under "My Goal"
+// Internal flag: _goal_sync_state
 // Runs in any Markdown mode
 
 const mdView = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
@@ -120,7 +115,7 @@ const fm = cache.frontmatter ?? {};
 const hasFM = !!cache.frontmatter;
 
 const yamlDone = hasFM && typeof fm.done === "boolean" ? fm.done : null;
-const prevState = hasFM && typeof fm._project_sync_state === "boolean" ? fm._project_sync_state : null;
+const prevState = hasFM && typeof fm._goal_sync_state === "boolean" ? fm._goal_sync_state : null;
 
 const text = await app.vault.read(file);
 
@@ -156,7 +151,7 @@ const setChecked = (line, v) => line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]")
 // Main
 if (!hasFM) return;
 
-const range = findHeadingRange(text, "My Project");
+const range = findHeadingRange(text, "My Goal");
 if (!range) return;
 
 const cb = getFirstCheckbox(text, range);
@@ -168,7 +163,7 @@ const boxNow = cb.checked;
 if (prevState === null) {
   await app.fileManager.processFrontMatter(file, f => {
     f.done = !!boxNow;
-    f._project_sync_state = !!boxNow;
+    f._goal_sync_state = !!boxNow;
   });
   return;
 }
@@ -180,7 +175,7 @@ if (boxChanged) {
   // Checkbox wins → update YAML
   await app.fileManager.processFrontMatter(file, f => {
     f.done = !!boxNow;
-    f._project_sync_state = !!boxNow;
+    f._goal_sync_state = !!boxNow;
   });
   return;
 }
@@ -191,8 +186,7 @@ if (yamlChanged) {
   const newText = text.slice(0, cb.absStart) + newLine + text.slice(cb.absEnd);
   if (newText !== text) await app.vault.modify(file, newText);
   await app.fileManager.processFrontMatter(file, f => {
-    f._project_sync_state = !!yamlDone;
+    f._goal_sync_state = !!yamlDone;
   });
 }
-
 ```

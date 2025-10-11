@@ -19,11 +19,11 @@ const core   = (m ? m[2] : title).trim();
 const lines = [
   "---",
   "_task_sync_state: false",
-  "priority: Medium",           // High | Medium | Low
+  "done: false",                // editable checkbox in Properties view
   "status: Active",             // Active | Archived
+  "priority: Medium",           // High | Medium | Low
   "due: ",                      // fill later
   "duration_hours: ",           // number
-  "done: false",                // editable checkbox in Properties view
   "tags: []",                   // YAML array
   "---",
   "",
