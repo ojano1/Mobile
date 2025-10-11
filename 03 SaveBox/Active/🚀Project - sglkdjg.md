@@ -5,7 +5,8 @@ created: 2025-10-11
 due:
 done: true
 tags: []
-_task_sync_state: true
+_task_sync_state: false
+_project_sync_state: true
 ---
 
 ### My Project
