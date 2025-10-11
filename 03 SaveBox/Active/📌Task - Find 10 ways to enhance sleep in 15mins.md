@@ -2,7 +2,7 @@
 priority: Medium
 status: Active
 create date: 2025-10-10
-due: 2025-10-11
+due: 2025-10-12
 duration_hours: "0.25"
 done: false
 ---

@@ -3,13 +3,13 @@ _task_sync_state: false
 done: false
 status: Active
 priority: Medium
-due: 2025-10-12
-duration_hours: "1"
+due:
+duration_hours:
 tags: []
 ---
 
 ### My Task
-- [ ] 📌Task - Task test2
+- [ ] 📌Task - Task tedt4
 
 
 ### 👷‍♂️Instructions:
