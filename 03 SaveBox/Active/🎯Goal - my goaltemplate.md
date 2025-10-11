@@ -1,39 +1,15 @@
-<%*
-/*
- * Goal Template — uses same YAML as Project Template
- * Result checkbox: "🎯Goal - <text after last dash in title>"
- */
+---
+priority: Medium
+status: Active
+created: 2025-10-11
+due:
+done: false
+tags: []
+---
 
-const PREFIX = "🎯Goal - "
-const title  = (tp.file.title ?? "").trim()
+### My Goal
+- [ ] 🎯Goal - my goaltemplate
 
-// Get text after the last "-"
-// If no "-", strip any leading symbols and "goal"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*goal\b\s*/i, "").trim()
-
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
-
-const lines = [
-  '---',
-  'priority: Medium',        // High | Medium | Low
-  'status: Active',          // Active | On Hold | Done
-  `created: ${created}`,
-  'due: ',                   // fill later
-  'done: false',             // editable checkbox property
-  'tags: []',                // YAML array
-  "---",
-  "",
-  "### My Goal",
-  `- [ ] ${PREFIX}${core}`,
-  "",
-]
-
-tR = lines.join('\n')
-%>
 
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: 🚀Create projects to realize this goal.
@@ -121,3 +97,4 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+

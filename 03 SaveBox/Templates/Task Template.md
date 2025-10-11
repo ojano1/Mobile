@@ -1,41 +1,41 @@
 <%*
 /*
- * Task Template — adds unique block ID for two-way sync
- * Result checkbox: "📌Task - <core>" ^t-<timestamp>
- */
+ Task Template
+ - Works with your router ("📌Task - <core>")
+ - Reads the prefix from the filename
+ - Adds a frontmatter `done` property (false by default)
+ - One task per note, under "### My Task"
+*/
 
-const PREFIX = "📌Task - ";
-const title  = (tp.file.title ?? "").trim();
+const title   = (tp.file.title ?? "").trim();
 const created = tp.file.creation_date("YYYY-MM-DD");
 
-// Extract text after last "-"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*task\b\s*/i, "").trim();
-if (!core) core = "Untitled";
-
-// Unique block ID (timestamp-based)
-const uid = "t-" + moment().format("YYYYMMDD-HHmmss");
+// Extract "<prefix>" and "<core>" from "<prefix><core>"
+// Example title: "📌Task - Call Client"
+const m = title.match(/^(.*?\bTask\s*-\s*)(.+)$/i);
+const prefix = m ? m[1] : "📌Task - ";
+const core   = (m ? m[2] : title).trim();
 
 const lines = [
   "---",
-  "priority: Medium",
-  "status: Active",
-  `create date: ${created}`,
-  "due: ",
-  "duration_hours: ",
+  "_task_sync_state: false",
+  "priority: Medium",           // High | Medium | Low
+  "status: Active",             // Active | On Hold | Done
+  `created: ${created}`,
+  "due: ",                      // fill later
+  "duration_hours: ",           // number
+  "done: false",                // editable checkbox in Properties view
+  "tags: []",                   // YAML array
   "---",
   "",
-  "Tags (start with # and a letter):",
-  "",
-  `> [!success] My Task`,
-  `> - [ ] ${PREFIX}${core} ^${uid}`,
-  `>`,
+  "### My Task",
+  `- [ ] ${prefix}${core}`,
   "",
 ];
 
 tR = lines.join("\n");
 %>
+
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add details  
 > - Describe, set duration_hours  
@@ -66,3 +66,112 @@ const backlinks = dv.pages()
 if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
 else dv.paragraph("None");
 ~~~
+
+```dataviewjs
+// Bidirectional silent sync between YAML `done`
+// and the first checkbox under "My Task".
+// Uses `_task_sync_state` in YAML for memory.
+// No output. No extra inserts.
+
+const file = app.workspace.getActiveFile();
+if (!file) return;
+
+const cache = app.metadataCache.getFileCache(file) ?? {};
+const fm = cache.frontmatter ?? {};
+const hasFM = !!cache.frontmatter;
+
+const yamlDone =
+  hasFM && typeof fm.done === "boolean" ? fm.done : null;
+const prevState =
+  hasFM && typeof fm._task_sync_state === "boolean" ? fm._task_sync_state : null;
+
+const text = await app.vault.read(file);
+
+// --- Helpers ---
+const replaceInFM = (src, nextDone, nextState) => {
+  const fmMatch = src.match(/^---\n[\s\S]*?\n---/);
+  if (!fmMatch) return src;
+  let block = fmMatch[0];
+
+  // Update or insert "done"
+  if (nextDone !== null) {
+    block = /^\s*done:\s*/m.test(block)
+      ? block.replace(/^\s*done:\s*.*/m, `done: ${nextDone}`)
+      : block.replace(/\n---\s*$/, `\ndone: ${nextDone}\n---`);
+  }
+
+  // Update or insert "_task_sync_state"
+  if (typeof nextState === "boolean") {
+    block = /^\s*_task_sync_state:\s*/m.test(block)
+      ? block.replace(/^\s*_task_sync_state:\s*.*/m, `_task_sync_state: ${nextState}`)
+      : block.replace(/\n---\s*$/, `\n_task_sync_state: ${nextState}\n---`);
+  }
+
+  return src.replace(fmMatch[0], block);
+};
+
+const findHeadingRange = (src, name) => {
+  const re = new RegExp(`^#{1,6}\\s+${name}\\s*$`, "gim");
+  const m = re.exec(src);
+  if (!m) return null;
+  const start = m.index + m[0].length;
+  const level = m[0].match(/^#+/)[0].length;
+  const next = new RegExp(`^#{1,${level}}\\s+`, "gim");
+  next.lastIndex = start;
+  const n = next.exec(src);
+  return { start, end: n ? n.index : src.length };
+};
+
+// allow "> - [ ]" etc.
+const taskRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
+
+const getFirstCheckbox = (src, range) => {
+  if (!range) return null;
+  const slice = src.slice(range.start, range.end);
+  const m = taskRe.exec(slice);
+  if (!m) return null;
+  const absStart = range.start + m.index;
+  const absEnd = absStart + m[0].length;
+  const checked = /\[(x|X)\]/.test(m[0]);
+  return { absStart, absEnd, line: m[0], checked };
+};
+
+const setTaskChecked = (line, v) =>
+  line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
+
+// --- Main ---
+if (!hasFM) return;
+
+const range = findHeadingRange(text, "My Task");
+if (!range) return;
+
+const task = getFirstCheckbox(text, range);
+if (!task) return;
+
+const taskNow = task.checked;
+
+// first run → adopt checkbox
+if (prevState === null) {
+  const updated = replaceInFM(text, taskNow, taskNow);
+  if (updated !== text) await app.vault.modify(file, updated);
+  return;
+}
+
+const yamlChanged = yamlDone !== null && yamlDone !== prevState;
+const taskChanged = taskNow !== prevState;
+
+let newText = text;
+
+if (taskChanged) {
+  // checkbox wins
+  newText = replaceInFM(newText, taskNow, taskNow);
+} else if (yamlChanged) {
+  // YAML wins
+  const newLine = setTaskChecked(task.line, yamlDone);
+  newText = text.slice(0, task.absStart) + newLine + text.slice(task.absEnd);
+  newText = replaceInFM(newText, yamlDone, yamlDone);
+}
+
+if (newText !== text) await app.vault.modify(file, newText);
+
+```

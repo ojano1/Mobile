@@ -1,40 +1,39 @@
 <%*
 /*
- * Project Template — hard-prefix + title-after-dash
- * Result checkbox: "🚀Project - <text after last dash in title>"
- */
+ Project Template
+ - Uses router rename ("🚀Project - <core>")
+ - Adds `done` property (false by default)
+ - Single main checkbox under “My Project” callout
+*/
 
-const PREFIX = "🚀Project - "
-const title  = (tp.file.title ?? "").trim()
+const PREFIX  = "🚀Project - ";
+const title   = (tp.file.title ?? "").trim();
+const created = tp.file.creation_date("YYYY-MM-DD");
 
-// Get text after the last "-"
-// If no "-", strip any leading symbols and "project"
+// Extract text after last "-"
 let core = title.includes("-")
   ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim()
-
-if (!core) core = "Untitled"
-
-const created = tp.file.creation_date("YYYY-MM-DD")
+  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim();
+if (!core) core = "Untitled";
 
 const lines = [
-  '---',
-  'priority: Medium',
-  'status: Active',
-  `create date: ${created}`,
-  'due: ',
-  '---',
-  '',
-  'Tags (start with # and a letter):',
-'',
-`> [!success] My Project`,
-`> - [ ] ${PREFIX}${core}`,
-`>`,
-``,
-]
+  "---",
+  "priority: Medium",         // High | Medium | Low
+  "status: Active",           // Active | On Hold | Done
+  `created: ${created}`,
+  "due: ",                    // fill later
+  "done: false",              // editable checkbox property
+  "tags: []",                 // YAML array
+  "---",
+  "",
+  "### My Project",
+  `- [ ] ${PREFIX}${core}`,
+  "",
+];
 
-tR = lines.join('\n')
+tR = lines.join("\n");
 %>
+
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: 📌Create tasks  
 > - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).

@@ -1,27 +1,25 @@
 ---
+_task_sync_state: false
 priority: Medium
 status: Active
-create date: 2025-10-11
-due: 2025-10-11
+created: 2025-10-11
+due:
 duration_hours:
-done: true
-tags:
-  - due-today
-  - Oct
-_done_task_state: true
+done: false
+tags: []
 ---
 
-Tags (start with # and a letter):
-
 ### My Task
-- [x] 📌Task - te4st
+- [ ] 📌Task - task ef;aljl;j
+
+
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add details  
 > - Describe, set duration_hours  
 > - Define expected output
 
 ### ✍️Description  
-
+''
 ___
 
 ### ✅Done Criteria  
@@ -30,7 +28,6 @@ ___
 
 ### 🔗➡️Links:
 *Add project links here if missing*
-[[🚀Project - Research healthy presleep rituals in 1wk]]
 
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs
@@ -48,10 +45,10 @@ else dv.paragraph("None");
 ~~~
 
 ```dataviewjs
-// Bi-directional, silent sync between YAML `done` and
-// the first checkbox under "My Task".
-// Stores last known task state in frontmatter: _done_task_state
-// No output. No inserts. Single write when needed.
+// Bidirectional silent sync between YAML `done`
+// and the first checkbox under "My Task".
+// Uses `_task_sync_state` in YAML for memory.
+// No output. No extra inserts.
 
 const file = app.workspace.getActiveFile();
 if (!file) return;
@@ -62,33 +59,37 @@ const hasFM = !!cache.frontmatter;
 
 const yamlDone =
   hasFM && typeof fm.done === "boolean" ? fm.done : null;
-const prevTaskState =
-  hasFM && typeof fm._done_task_state === "boolean" ? fm._done_task_state : null;
+const prevState =
+  hasFM && typeof fm._task_sync_state === "boolean" ? fm._task_sync_state : null;
 
 const text = await app.vault.read(file);
 
-// helpers
-const replaceInFM = (src, nextDone, nextPrev) => {
-  const m = src.match(/^---\n[\s\S]*?\n---/);
-  if (!m) return src;
+// --- Helpers ---
+const replaceInFM = (src, nextDone, nextState) => {
+  const fmMatch = src.match(/^---\n[\s\S]*?\n---/);
+  if (!fmMatch) return src;
+  let block = fmMatch[0];
 
-  const block = m[0];
-  const setKV = (b, key, valRe, line) =>
-    valRe.test(b) ? b.replace(valRe, line) : b.replace(/\n---\s*$/, `\n${line}\n---`);
-
-  let newBlock = block;
+  // Update or insert "done"
   if (nextDone !== null) {
-    newBlock = setKV(newBlock, "done", /^\s*done:\s*.*/m, `done: ${nextDone}`);
+    block = /^\s*done:\s*/m.test(block)
+      ? block.replace(/^\s*done:\s*.*/m, `done: ${nextDone}`)
+      : block.replace(/\n---\s*$/, `\ndone: ${nextDone}\n---`);
   }
-  if (typeof nextPrev === "boolean") {
-    newBlock = setKV(newBlock, "_done_task_state", /^\s*_done_task_state:\s*.*/m, `_done_task_state: ${nextPrev}`);
+
+  // Update or insert "_task_sync_state"
+  if (typeof nextState === "boolean") {
+    block = /^\s*_task_sync_state:\s*/m.test(block)
+      ? block.replace(/^\s*_task_sync_state:\s*.*/m, `_task_sync_state: ${nextState}`)
+      : block.replace(/\n---\s*$/, `\n_task_sync_state: ${nextState}\n---`);
   }
-  return src.replace(block, newBlock);
+
+  return src.replace(fmMatch[0], block);
 };
 
 const findHeadingRange = (src, name) => {
-  const h = new RegExp(`^#{1,6}\\s+${name}\\s*$`, "gim");
-  const m = h.exec(src);
+  const re = new RegExp(`^#{1,6}\\s+${name}\\s*$`, "gim");
+  const m = re.exec(src);
   if (!m) return null;
   const start = m.index + m[0].length;
   const level = m[0].match(/^#+/)[0].length;
@@ -98,7 +99,7 @@ const findHeadingRange = (src, name) => {
   return { start, end: n ? n.index : src.length };
 };
 
-// allow optional ">" and spaces before "- [ ]"
+// allow "> - [ ]" etc.
 const taskRe = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/gim;
 
 const getFirstCheckbox = (src, range) => {
@@ -115,7 +116,7 @@ const getFirstCheckbox = (src, range) => {
 const setTaskChecked = (line, v) =>
   line.replace(/\[(?: |x|X)\]/, v ? "[x]" : "[ ]");
 
-// run
+// --- Main ---
 if (!hasFM) return;
 
 const range = findHeadingRange(text, "My Task");
@@ -126,38 +127,28 @@ if (!task) return;
 
 const taskNow = task.checked;
 
-// decide winner
-let newText = text;
-
-if (prevTaskState === null) {
-  // first run, adopt the checkbox as source
-  const targetDone = taskNow;
-  const updated = replaceInFM(text, targetDone, taskNow);
-  if (updated !== text) await app.vault.modify(file, updated);
-  return;
-}
-
-const taskChanged = taskNow !== prevTaskState;
-const yamlChanged = yamlDone !== null && yamlDone !== prevTaskState;
-
-if (taskChanged) {
-  // checkbox wins
+// first run → adopt checkbox
+if (prevState === null) {
   const updated = replaceInFM(text, taskNow, taskNow);
   if (updated !== text) await app.vault.modify(file, updated);
   return;
 }
 
-if (yamlChanged) {
+const yamlChanged = yamlDone !== null && yamlDone !== prevState;
+const taskChanged = taskNow !== prevState;
+
+let newText = text;
+
+if (taskChanged) {
+  // checkbox wins
+  newText = replaceInFM(newText, taskNow, taskNow);
+} else if (yamlChanged) {
   // YAML wins
-  if (yamlDone === null) return;
-  if (taskNow === yamlDone) {
-    const updated = replaceInFM(text, yamlDone, yamlDone);
-    if (updated !== text) await app.vault.modify(file, updated);
-    return;
-  }
   const newLine = setTaskChecked(task.line, yamlDone);
   newText = text.slice(0, task.absStart) + newLine + text.slice(task.absEnd);
   newText = replaceInFM(newText, yamlDone, yamlDone);
-  if (newText !== text) await app.vault.modify(file, newText);
 }
+
+if (newText !== text) await app.vault.modify(file, newText);
+
 ```
