@@ -17,7 +17,7 @@ ___
 [[🌱Area - Deen]]
 
 >[!tip] Step 2: Make one wish per area that would make you happy.
->- Ask yourself: What makes me happy in my (area) is if I have/can...
+>- Ask yourself: What makes me happy in my (area) is if I have/can do...
 ### Write your wishes here👇
 Example: What makes me happy in my health is if I can wake up feeling fresh everyday. 
 '

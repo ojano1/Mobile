@@ -228,7 +228,10 @@ if (!fileDate) {
   // --- host date from filename: "11 Oct 2025" or "2025-10-11"
   const host = dv.current().file.name;
   const m = window.moment(host, ["D MMM YYYY", "DD MMM YYYY", "YYYY-MM-DD"], true);
-  if (!m.isValid()) { dv.paragraph("Filename needs a date like 11 Oct 2025 or 2025-10-11."); return; }
+  if (!m.isValid()) { 
+    dv.paragraph("Filename needs a date like 11 Oct 2025 or 2025-10-11."); 
+    return; 
+  }
   const TODAY = m.startOf("day");
 
   // --- candidates: Task notes only, exclude Templates/Archive and names ending with "!"
@@ -242,22 +245,27 @@ if (!fileDate) {
   const prRank = { High: 1, Medium: 2, Med: 2, Low: 3 };
   const rx = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const toNum = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+
   function sectionText(src, name) {
     const re = new RegExp(`^#{1,6}\\s+${rx(name)}\\s*$`, "gim");
-    const m = re.exec(src); if (!m) return null;
+    const m = re.exec(src); 
+    if (!m) return null;
     const start = m.index + m[0].length;
     const level = (m[0].match(/^#+/) || ["#"])[0].length;
-    const next = new RegExp(`^#{1,${level}}\\s+`, "gim"); next.lastIndex = start;
+    const next = new RegExp(`^#{1,${level}}\\s+`, "gim"); 
+    next.lastIndex = start;
     const n = next.exec(src);
     return { text: src.slice(start, n ? n.index : src.length) };
   }
+
   function firstCheckbox(sec) {
     const re = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/m;
-    const m = re.exec(sec.text); if (!m) return null;
+    const m = re.exec(sec.text); 
+    if (!m) return null;
     return { checked: /\[(x|X)\]/.test(m[0]) };
   }
 
-  // --- gather OVERDUE tasks (due date < TODAY)
+  // --- gather OVERDUE tasks (due date < TODAY and not done)
   const rows = [];
   for (const p of pages) {
     // parse due from YAML
@@ -271,7 +279,7 @@ if (!fileDate) {
     const daysDue = TODAY.diff(due, "days");
     if (daysDue <= 0) continue; // today or future are excluded
 
-    // first checkbox under "My Task" to mirror your linking behavior
+    // read the first checkbox under "My Task"
     const file = app.vault.getAbstractFileByPath(p.file.path);
     if (!file) continue;
     const text = await app.vault.read(file);
@@ -281,6 +289,7 @@ if (!fileDate) {
     if (!box) continue;
 
     const checked = typeof p.done === "boolean" ? p.done : box.checked;
+    if (checked) continue; // ✅ skip completed tasks
 
     rows.push({
       path: p.file.path,
@@ -292,7 +301,10 @@ if (!fileDate) {
     });
   }
 
-  if (!rows.length) { dv.paragraph("No overdue tasks 🎉"); return; }
+  if (!rows.length) { 
+    dv.paragraph("No overdue tasks 🎉"); 
+    return; 
+  }
 
   // --- sort: most overdue first, then priority, then shorter duration
   rows.sort((a, b) => {
@@ -300,11 +312,10 @@ if (!fileDate) {
     return b.daysDue - a.daysDue || ap - bp || (a.dur ?? 0) - (b.dur ?? 0);
   });
 
-  // --- render: single flat list, checkbox + title + meta on one line (wraps naturally)
+  // --- render: single flat list, checkbox + title + meta inline
   const listDiv = document.createElement("div");
 
   for (const r of rows) {
-    // grid: checkbox + content, meta inline with title (wraps to second visual line when needed)
     const row = document.createElement("div");
     row.style.display = "grid";
     row.style.gridTemplateColumns = "auto 1fr";
@@ -327,9 +338,12 @@ if (!fileDate) {
     link.textContent = r.name;
     link.href = "#";
     link.style.minWidth = "0";
-    link.onclick = e => { e.preventDefault(); app.workspace.openLinkText(r.path, dv.current().file.path, false); };
+    link.onclick = e => { 
+      e.preventDefault(); 
+      app.workspace.openLinkText(r.path, dv.current().file.path, false); 
+    };
 
-    // meta: "<N> day(s) due · Priority · Duration"
+    // meta: "X days due · Priority · Duration"
     const meta = document.createElement("span");
     meta.style.opacity = "0.8";
     meta.style.marginLeft = "8px";
@@ -364,15 +378,21 @@ if (!fileDate) {
     });
   }
 
-  // footer message when all overdue are checked
+  // --- footer message when all overdue are checked
   const msg = document.createElement("div");
   msg.style.marginTop = "6px";
   msg.style.textAlign = "left";
   msg.style.fontWeight = "500";
+
   const checkAllDone = () => {
     const boxes = listDiv.querySelectorAll('input[type="checkbox"]');
-    if (!boxes.length) { msg.textContent = ""; return; }
-    msg.textContent = Array.from(boxes).every(x => x.checked) ? "All done, nice work! 🎉☕️" : "";
+    if (!boxes.length) { 
+      msg.textContent = ""; 
+      return; 
+    }
+    msg.textContent = Array.from(boxes).every(x => x.checked)
+      ? "All done, nice work! 🎉☕️"
+      : "";
   };
   checkAllDone();
 

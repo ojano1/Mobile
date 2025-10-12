@@ -3,7 +3,7 @@ _task_sync_state: false
 done: true
 status: Active
 priority: Medium
-due: 2025-10-12
+due: 2025-10-11
 duration_hours: "1"
 tags: []
 timeslot: Morning
