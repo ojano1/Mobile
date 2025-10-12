@@ -2,14 +2,14 @@
 priority: Medium
 status: Active
 create date: 2025-10-04
-due:
+due: 2025-10-12
+done: true
+_project_sync_state: true
+duration_hours: "1"
 ---
 Tags (start with # and a letter): #Q4 
-> [!success] My Project 👇
-> - [ ] 🚀Project - myproject
->
-> - Tick when done.
-> - ⚠️ Keep only one project here, go to Goal page to add another. 
+### My Project
+- [x] 🚀Project - myproject
 
 ### Next, follow these steps👇
 - [ ] 2025-10-09 ^2025-10-09
