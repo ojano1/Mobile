@@ -4,7 +4,7 @@ done: true
 status: Active
 priority: Medium
 due: 2025-10-11
-duration_hours:
+duration_hours: "1"
 tags: []
 ---
 

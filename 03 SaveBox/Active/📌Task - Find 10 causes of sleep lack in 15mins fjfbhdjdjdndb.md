@@ -4,15 +4,15 @@ status: Active
 create date: 2025-10-10
 due: 2025-10-12
 duration_hours: "1"
-done: false
-_task_sync_state: false
+done: true
+_task_sync_state: true
 timeslot: Morning
 ---
 
 Tags (start with # and a letter): #Oct
 
 ### My Task
-- [ ] 📌Task - Find 10 causes of sleep lack in 15mins
+- [x] 📌Task - Find 10 causes of sleep lack in 15mins
 
 
 [[🧠Mind Map]]

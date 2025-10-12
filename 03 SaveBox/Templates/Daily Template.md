@@ -7,20 +7,17 @@ ___
 ### 📌My tasks for today
 ~~~dataviewjs
 (async () => {
-  // --- host date from filename: "11 Oct 2025" or "2025-10-11"
   const host = dv.current().file.name;
   const m = window.moment(host, ["D MMM YYYY", "DD MMM YYYY", "YYYY-MM-DD"], true);
   if (!m.isValid()) { dv.paragraph("Filename needs a date like 11 Oct 2025 or 2025-10-11."); return; }
   const ISO = m.format("YYYY-MM-DD");
 
-  // --- candidates: Task notes only
   const pages = dv.pages().where(p =>
     !/Templates|Archive/i.test(p.file.folder) &&
     !/[!]\s*$/.test(p.file.name) &&
     p.file.name.includes("Task")
   );
 
-  // --- helpers
   const prRank = { High: 1, Medium: 2, Med: 2, Low: 3 };
   const rx = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const toNum = v => Number.isFinite(Number(v)) ? Number(v) : 0;
@@ -39,7 +36,6 @@ ___
     return { checked: /\[(x|X)\]/.test(m[0]) };
   }
 
-  // --- gather tasks for the host day
   const rows = [];
   for (const p of pages) {
     let dueISO = null;
@@ -70,7 +66,6 @@ ___
 
   if (!rows.length) { dv.paragraph("This must be Sunday 🪁"); return; }
 
-  // --- group by timeslot
   const slotOrder = ["Morning", "Afternoon", "Evening", "Anytime"];
   const slotEmoji = { Morning: "🌅", Afternoon: "🌞", Evening: "🌙", Anytime: "🕒" };
   const slotDesc  = {
@@ -82,7 +77,6 @@ ___
   const groups = Object.fromEntries(slotOrder.map(s => [s, []]));
   for (const r of rows) groups[slotOrder.includes(r.timeslot) ? r.timeslot : "Anytime"].push(r);
 
-  // --- render
   const wrap = document.createElement("div");
   wrap.style.display = "block";
 
@@ -102,7 +96,7 @@ ___
       header.textContent =
         `${slotEmoji[slot]} ${slot} (${count} task${count > 1 ? "s" : ""} • ${hours} hr${hours === 1 ? "" : "s"})`;
     } else {
-      header.textContent = `${slotEmoji[slot]} ${slot}`;
+      header.textContent = `${slotEmoji[slot]} ${slot} (None)`;
     }
     g.appendChild(header);
 
@@ -115,23 +109,19 @@ ___
     g.appendChild(subtitle);
 
     if (hasItems) {
-      // sort inside group
       group.sort((a, b) => {
         const ap = prRank[a.pri] ?? 9, bp = prRank[b.pri] ?? 9;
         return ap - bp || (a.dur ?? 0) - (b.dur ?? 0);
       });
 
       const listDiv = document.createElement("div");
-
       for (const r of group) {
-        // Use CSS grid: checkbox column + content column.
-        // Inside content, link and meta are inline so meta starts on the SAME wrapped line.
         const row = document.createElement("div");
         row.style.display = "grid";
         row.style.gridTemplateColumns = "auto 1fr";
         row.style.alignItems = "start";
         row.style.columnGap = "8px";
-        row.style.rowGap = "0";           // no extra blank line between wrapped rows
+        row.style.rowGap = "0";
         row.style.padding = "2px 0";
         row.style.minWidth = "0";
 
@@ -140,7 +130,6 @@ ___
         cb.checked = r.checked;
         cb.style.margin = "0";
 
-        // content block
         const content = document.createElement("div");
         content.style.minWidth = "0";
         content.style.lineHeight = "1.35";
@@ -151,7 +140,6 @@ ___
         link.style.minWidth = "0";
         link.onclick = e => { e.preventDefault(); app.workspace.openLinkText(r.path, dv.current().file.path, false); };
 
-        // meta inline, appears right after title; wraps to the very next visual line
         const meta = document.createElement("span");
         meta.style.opacity = "0.8";
         meta.style.marginLeft = "8px";
@@ -182,14 +170,11 @@ ___
           checkAllDone();
         });
       }
-
       g.appendChild(listDiv);
     }
-
     wrap.appendChild(g);
   }
 
-  // footer
   const msg = document.createElement("div");
   msg.style.marginTop = "6px";
   msg.style.textAlign = "left";
@@ -239,119 +224,160 @@ if (!fileDate) {
 ```
 ### Overdue Tasks
 ~~~dataviewjs
-const ROOT = "03 SaveBox/Active";
+(async () => {
+  // --- host date from filename: "11 Oct 2025" or "2025-10-11"
+  const host = dv.current().file.name;
+  const m = window.moment(host, ["D MMM YYYY", "DD MMM YYYY", "YYYY-MM-DD"], true);
+  if (!m.isValid()) { dv.paragraph("Filename needs a date like 11 Oct 2025 or 2025-10-11."); return; }
+  const TODAY = m.startOf("day");
 
-// --- get "today" (host date) from the host filename ---
-const hostName = dv.current().file.name;
-// supports "07 Oct 2025" or "Tue, 07 Oct 2025"
-const m = hostName.match(/(\d{1,2})\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\s*(\d{4})/i);
-if (!m) { dv.paragraph("❌ Host filename needs a date like `07 Oct 2025`."); return; }
-const mm = {jan:"01",feb:"02",mar:"03",apr:"04",may:"05",jun:"06",jul:"07",aug:"08",sep:"09",oct:"10",nov:"11",dec:"12"}[m[2].toLowerCase().slice(0,3)];
-const day = String(parseInt(m[1],10)).padStart(2,"0");
-const todayISO = `${m[3]}-${mm}-${day}`;
-const today = dv.date(todayISO);
-// --- end host date ---
+  // --- candidates: Task notes only, exclude Templates/Archive and names ending with "!"
+  const pages = dv.pages().where(p =>
+    !/Templates|Archive/i.test(p.file.folder) &&
+    !/[!]\s*$/.test(p.file.name) &&
+    p.file.name.includes("Task")
+  );
 
-const pages = dv.pages(`"${ROOT}"`);
+  // --- helpers
+  const prRank = { High: 1, Medium: 2, Med: 2, Low: 3 };
+  const rx = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const toNum = v => Number.isFinite(Number(v)) ? Number(v) : 0;
+  function sectionText(src, name) {
+    const re = new RegExp(`^#{1,6}\\s+${rx(name)}\\s*$`, "gim");
+    const m = re.exec(src); if (!m) return null;
+    const start = m.index + m[0].length;
+    const level = (m[0].match(/^#+/) || ["#"])[0].length;
+    const next = new RegExp(`^#{1,${level}}\\s+`, "gim"); next.lastIndex = start;
+    const n = next.exec(src);
+    return { text: src.slice(start, n ? n.index : src.length) };
+  }
+  function firstCheckbox(sec) {
+    const re = /^[ \t>]*[-*]\s+\[( |x|X)\]\s.*$/m;
+    const m = re.exec(sec.text); if (!m) return null;
+    return { checked: /\[(x|X)\]/.test(m[0]) };
+  }
 
-function priorityLabel(p) {
-  if (!p) return "";
-  const val = String(p).toLowerCase();
-  if (val.startsWith("h")) return "High";
-  if (val.startsWith("m")) return "Med";
-  if (val.startsWith("l")) return "Low";
-  return "";
-}
-
-// helper to calculate day difference
-function daysBetween(older, newer) {
-  const diff = Math.floor((newer.ts - older.ts) / (1000 * 60 * 60 * 24));
-  return diff;
-}
-
-let listItems = [];
-
-// Tasks with due before host date (overdue)
-for (const p of pages) {
-  const tasks = p.file?.tasks ?? [];
-  for (const t of tasks) {
-    const d = t.due ? t.due.toISODate() : null;
-    if (!t.completed && d && d < todayISO) {
-      const dueDate = dv.date(d);
-      const diff = daysBetween(dueDate, today);
-      const line = dv.el("div", "", { cls: "dv-overdue-task" });
-
-      // checkbox + text
-      const container = line.createSpan();
-      container.appendChild(dv.taskList([t], false));
-
-      // days due display
-      const text = diff === 1 ? "1 day due" : `${diff} days due`;
-      line.createSpan({ text: "  ·  " + text });
-
-      listItems.push(line);
+  // --- gather OVERDUE tasks (due date < TODAY)
+  const rows = [];
+  for (const p of pages) {
+    // parse due from YAML
+    let due = null;
+    if (p.due) {
+      const mdue = window.moment(String(p.due), ["YYYY-MM-DD", "D MMM YYYY", window.moment.ISO_8601], true);
+      if (mdue.isValid()) due = mdue.startOf("day");
     }
-  }
-}
+    if (!due) continue;
 
-// Notes with frontmatter due before host date
-for (const p of pages) {
-  const fm = p.file?.frontmatter ?? {};
-  const fmDueISO = fm.due ? dv.date(fm.due).toISODate() : null;
-  const isDone = fm.done === true || fm.completed === true;
-  if (fmDueISO && fmDueISO < todayISO && !isDone) {
-    const dueDate = dv.date(fmDueISO);
-    const diff = daysBetween(dueDate, today);
-    const line = dv.el("div", "", { cls: "dv-overdue-note" });
+    const daysDue = TODAY.diff(due, "days");
+    if (daysDue <= 0) continue; // today or future are excluded
 
-    // checkbox
-    const cb = line.createEl("input", { type: "checkbox" });
-    cb.addEventListener("change", async e => {
-      await toggleFrontmatterDone(p.file.path, e.target.checked);
-      app.workspace.trigger("dataview:refresh-views");
+    // first checkbox under "My Task" to mirror your linking behavior
+    const file = app.vault.getAbstractFileByPath(p.file.path);
+    if (!file) continue;
+    const text = await app.vault.read(file);
+    const sec = sectionText(text, "My Task");
+    if (!sec) continue;
+    const box = firstCheckbox(sec);
+    if (!box) continue;
+
+    const checked = typeof p.done === "boolean" ? p.done : box.checked;
+
+    rows.push({
+      path: p.file.path,
+      name: p.file.name,
+      checked,
+      pri: p.priority ?? "",
+      dur: toNum(p.duration_hours ?? 0),
+      daysDue,
     });
+  }
 
-    line.createSpan({ text: " " });
-    const a = line.createEl("a", { href: "#", text: p.file.name });
-    a.addEventListener("click", evt => {
-      evt.preventDefault();
-      app.workspace.openLinkText(p.file.path, dv.current().file.path, false);
+  if (!rows.length) { dv.paragraph("No overdue tasks 🎉"); return; }
+
+  // --- sort: most overdue first, then priority, then shorter duration
+  rows.sort((a, b) => {
+    const ap = prRank[a.pri] ?? 9, bp = prRank[b.pri] ?? 9;
+    return b.daysDue - a.daysDue || ap - bp || (a.dur ?? 0) - (b.dur ?? 0);
+  });
+
+  // --- render: single flat list, checkbox + title + meta on one line (wraps naturally)
+  const listDiv = document.createElement("div");
+
+  for (const r of rows) {
+    // grid: checkbox + content, meta inline with title (wraps to second visual line when needed)
+    const row = document.createElement("div");
+    row.style.display = "grid";
+    row.style.gridTemplateColumns = "auto 1fr";
+    row.style.alignItems = "start";
+    row.style.columnGap = "8px";
+    row.style.rowGap = "0";
+    row.style.padding = "2px 0";
+    row.style.minWidth = "0";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.checked = r.checked;
+    cb.style.margin = "0";
+
+    const content = document.createElement("div");
+    content.style.minWidth = "0";
+    content.style.lineHeight = "1.35";
+
+    const link = document.createElement("a");
+    link.textContent = r.name;
+    link.href = "#";
+    link.style.minWidth = "0";
+    link.onclick = e => { e.preventDefault(); app.workspace.openLinkText(r.path, dv.current().file.path, false); };
+
+    // meta: "<N> day(s) due · Priority · Duration"
+    const meta = document.createElement("span");
+    meta.style.opacity = "0.8";
+    meta.style.marginLeft = "8px";
+    const dueText = `${r.daysDue} day${r.daysDue === 1 ? "" : "s"} due`;
+    const time = `${r.dur} hr${r.dur === 1 ? "" : "s"}`;
+    const bits = [dueText, r.pri || "", time].filter(Boolean);
+    meta.textContent = bits.length ? "· " + bits.join(" · ") : "";
+
+    const doneMark = document.createElement("span");
+    doneMark.textContent = " ✅";
+    doneMark.style.marginLeft = "6px";
+    doneMark.style.display = r.checked ? "inline" : "none";
+
+    content.append(link, meta, doneMark);
+    row.append(cb, content);
+    listDiv.appendChild(row);
+
+    const applyDoneStyle = done => {
+      link.style.textDecoration = done ? "line-through" : "none";
+      meta.style.display = done ? "none" : "inline";
+      doneMark.style.display = done ? "inline" : "none";
+    };
+    applyDoneStyle(r.checked);
+
+    // sync YAML `done` in the task note
+    cb.addEventListener("change", async () => {
+      const f = app.vault.getAbstractFileByPath(r.path);
+      if (!f) return;
+      await app.fileManager.processFrontMatter(f, fm => { fm.done = cb.checked; });
+      applyDoneStyle(cb.checked);
+      checkAllDone();
     });
-
-    // days due display
-    const text = diff === 1 ? "1 day due" : `${diff} days due`;
-    line.createSpan({ text: "  ·  " + text });
-
-    listItems.push(line);
   }
-}
 
-// toggle YAML done (unchanged)
-async function toggleFrontmatterDone(filePath, value) {
-  const file = app.vault.getAbstractFileByPath(filePath);
-  if (!file) return;
-  const content = await app.vault.read(file);
-  const m = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (m) {
-    let fm = m[1];
-    if (/^done:/m.test(fm)) {
-      fm = fm.replace(/^done:\s*(true|false).*$/m, `done: ${value}`);
-    } else if (/^completed:/m.test(fm)) {
-      fm = fm.replace(/^completed:\s*(true|false).*$/m, `completed: ${value}`);
-    } else {
-      fm += `\ndone: ${value}`;
-    }
-    await app.vault.modify(file, `---\n${fm}\n---\n${m[2]}`);
-  } else {
-    await app.vault.modify(file, `---\ndone: ${value}\n---\n${content}`);
-  }
-}
+  // footer message when all overdue are checked
+  const msg = document.createElement("div");
+  msg.style.marginTop = "6px";
+  msg.style.textAlign = "left";
+  msg.style.fontWeight = "500";
+  const checkAllDone = () => {
+    const boxes = listDiv.querySelectorAll('input[type="checkbox"]');
+    if (!boxes.length) { msg.textContent = ""; return; }
+    msg.textContent = Array.from(boxes).every(x => x.checked) ? "All done, nice work! 🎉☕️" : "";
+  };
+  checkAllDone();
 
-if (!listItems.length) {
-  dv.paragraph("✅ All done! 👏");
-} else {
-  for (const item of listItems) dv.container.appendChild(item);
-}
+  dv.container.append(listDiv, msg);
+})();
 ~~~
 ___
 #### 🔄 End-of-Day Review
