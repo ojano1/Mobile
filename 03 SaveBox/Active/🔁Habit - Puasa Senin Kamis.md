@@ -82,20 +82,14 @@ style.textContent = `
 .month-row { display:flex; align-items:center; gap:12px; width:100%; }
 .month-label { width:3ch; text-align:right; font-weight:600; font-size:.95em; }
 
+
 .bar-track {
   position:relative;
   flex:1;
   height:14px;
   border-radius:10px;
   overflow:hidden;
-
-  /* grey to 80%, soft green to 100% */
-  background:
-    linear-gradient(to right,
-      var(--background-modifier-border) 0%,
-      var(--background-modifier-border) 80%,
-      #bde3c0 80%,
-      #bde3c0 100%);
+  background: color-mix(in srgb, var(--background-modifier-border) 35%, transparent);
 }
 
 .bar-fill {
@@ -103,7 +97,7 @@ style.textContent = `
   border-radius:10px;
   background: var(--interactive-accent);
 }
-.bar-fill.bar-orange { background:#e3963e; }
+.bar-fill.bar-orange { background:#f4b56a; }
 
 .pct-text {
   display:flex; align-items:baseline; gap:1px;
@@ -241,7 +235,7 @@ if (!tasks.length) {
 
   /* MOST RECENT DONE = orange override (same as slider) */
   .weekly-streak-cell.latest-hit {
-    background: #f59e0b !important;
+    background: #f4b56a !important;
   }
   .weekly-streak-cell.latest-hit .num,
   .weekly-streak-cell.latest-hit .mmm { color:white; }
@@ -254,9 +248,10 @@ if (!tasks.length) {
 
 ### ✍️Log
 
-- [x] 🔁Habit - puahup 2025-10-12 ^2025-10-12
-- [x] 🔁Habit - puahup 2025-10-11 ^2025-10-12
+- [x] 🔁Habit - Puasa Senin Kamis 2025-10-13 ^2025-10-13
 
-### Log
 
-- [ ] 🔁Habit - puahup 2025-10-13 ^2025-10-13
+
+
+
+

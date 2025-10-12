@@ -1,4 +1,3 @@
-- [ ] 2025-10-09 ^2025-10-09
 
  ## Tafsir Quran
  Aln Inshiqoq:19
