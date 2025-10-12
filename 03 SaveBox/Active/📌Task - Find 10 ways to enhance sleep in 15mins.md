@@ -4,14 +4,14 @@ status: Active
 create date: 2025-10-10
 due: 2025-10-12
 duration_hours: "0.25"
-done: false
+done: true
+_task_sync_state: true
 ---
 
 Tags (start with # and a letter):
 
-> [!success] My Task
-> - [ ] 📌Task - Find 10 ways to enhance sleep in 15mins
->
+### My Task
+- [x] 📌Task - Find 10 ways to enhance sleep in 15mins
 
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add more details
