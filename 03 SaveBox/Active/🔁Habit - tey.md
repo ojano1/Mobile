@@ -1,11 +1,122 @@
 
-### 📅 30-Day Grid
 
 ~~~dataviewjs
-// === Foldable Habit Grid (7 cols) + Streak + Completion % ===
-// Latest week shown at the TOP, days inside a week stay Mon→Sun.
+// === Habit Monthly Consistency (last 3 months, #bde3c0 zone) ===
 
-// keep this switch if you sometimes want to anchor to today
+const M = window.moment;
+const toISO = d => M(d).format("YYYY-MM-DD");
+
+// fallback data if no tasks
+function generateFakeHabitData() {
+  const today = M();
+  const start = today.clone().subtract(89, "days");
+  const out = [];
+  let d = start.clone();
+  while (d.isSameOrBefore(today)) {
+    out.push({ date: toISO(d), done: Math.random() < 0.75 });
+    d.add(1, "day");
+  }
+  return out;
+}
+
+function extractISO(s) {
+  const m = String(s).match(/(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : null;
+}
+
+// collect
+let tasks = dv.current().file.tasks ?? [];
+tasks = tasks.map(t => ({ date: extractISO(t.text), done: !!t.completed })).filter(t => t.date);
+if (!tasks.length) tasks = generateFakeHabitData();
+
+// per-day map
+const perDay = new Map();
+for (const t of tasks) perDay.set(t.date, (perDay.get(t.date) || false) || t.done);
+
+// group by month
+const byMonth = {};
+for (const [date, done] of perDay) {
+  const k = M(date).format("YYYY-MM");
+  (byMonth[k] ||= []).push({ date, done });
+}
+
+// last 3 months, latest first
+const months = Object.keys(byMonth).sort().slice(-3).reverse();
+const monthStats = months.map(m => {
+  const arr = byMonth[m];
+  const pct = arr.length ? Math.round((arr.filter(x => x.done).length / arr.length) * 100) : 0;
+  return { label: M(m, "YYYY-MM").format("MMM"), pct };
+});
+
+// streak
+let streak = 0;
+{
+  let d = M();
+  for (let i = 0; i < 90; i++) {
+    if (perDay.get(toISO(d))) streak++; else break;
+    d.subtract(1, "day");
+  }
+}
+
+// render
+const wrap = dv.el("div", "", { cls: "habit-monthly-summary" });
+wrap.createEl("p").innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"}</strong>`;
+
+const barWrap = wrap.createDiv({ cls: "month-bars" });
+monthStats.forEach(({ label, pct }, idx) => {
+  const row = barWrap.createDiv({ cls: "month-row" });
+  row.innerHTML = `
+    <div class="month-label">${label}</div>
+    <div class="bar-track">
+      <div class="bar-fill ${idx === 0 ? 'bar-orange' : 'bar-purple'}" style="width:${pct}%;"></div>
+    </div>
+    <div class="pct-text">${pct}<span class="pct-symbol">%</span></div>
+  `;
+});
+
+// style with rightmost 20% in #bde3c0
+const style = document.createElement("style");
+style.textContent = `
+.habit-monthly-summary { margin:.75rem 0 1rem; }
+.month-bars { display:flex; flex-direction:column; gap:10px; max-width:560px; }
+.month-row { display:flex; align-items:center; gap:12px; width:100%; }
+.month-label { width:3ch; text-align:right; font-weight:600; font-size:.95em; }
+
+.bar-track {
+  position:relative;
+  flex:1;
+  height:14px;
+  border-radius:10px;
+  overflow:hidden;
+
+  /* grey to 80%, soft green to 100% */
+  background:
+    linear-gradient(to right,
+      var(--background-modifier-border) 0%,
+      var(--background-modifier-border) 80%,
+      #bde3c0 80%,
+      #bde3c0 100%);
+}
+
+.bar-fill {
+  position:absolute; top:0; left:0; bottom:0;
+  border-radius:10px;
+  background: var(--interactive-accent);
+}
+.bar-fill.bar-orange { background:#f59e0b; }
+
+.pct-text {
+  display:flex; align-items:baseline; gap:1px;
+  font-weight:600; font-size:1.05em; white-space:nowrap;
+}
+.pct-symbol { font-size:.8em; line-height:1; }
+`;
+wrap.appendChild(style);
+~~~
+##### 📅 30-Day Grid
+~~~dataviewjs
+// === Habit Grid (7 cols) — latest week on top, latest DONE = orange ===
+// ANCHOR controls whether we anchor the window to "today" or the latest logged date.
 const ANCHOR = "today"; // "today" or "latest"
 const M = window.moment;
 const toISO = d => M(d).format("YYYY-MM-DD");
@@ -30,75 +141,59 @@ const tasks = rawTasks
 if (!tasks.length) {
   dv.paragraph("No habit tasks found.");
 } else {
-  // collapse multiple entries per day to a single boolean (any done = done)
+  // one boolean per day (any done = done)
   const perDay = new Map();
   for (const t of tasks) perDay.set(t.date, (perDay.get(t.date) || false) || t.done);
-  const state = perDay;
 
-  const datesSorted = [...state.keys()].sort();
-  const latest = M(datesSorted[datesSorted.length - 1]).startOf("day");
-  const today  = M().startOf("day");
-  const end    = (ANCHOR === "today") ? today : latest;
-  const start  = end.clone().subtract(29, "days");
-  const gridStart = start.clone().startOf("isoWeek");
-  const gridEnd   = end.clone().endOf("isoWeek");
+  const datesSorted = [...perDay.keys()].sort();
+  const latestLogged = M(datesSorted[datesSorted.length - 1]).startOf("day");
+  const today        = M().startOf("day");
+  const end          = (ANCHOR === "today") ? today : latestLogged;
+  const start        = end.clone().subtract(29, "days");
+  const gridStart    = start.clone().startOf("isoWeek");
+  const gridEnd      = end.clone().endOf("isoWeek");
 
-  // --- streak (from end backwards, max 30 days) ---
-  let streak = 0;
-  {
-    let d = end.clone();
-    for (let i = 0; i < 30; i++) {
-      const iso = toISO(d);
-      if (state.get(iso)) streak++; else break;
-      d.subtract(1, "day");
-    }
-  }
-
-  // --- completion rate (same rules as your latest code) ---
-  const loggedDates = datesSorted;
-  const loggedCount = loggedDates.length;
-  let completionRate = 0;
-  if (loggedCount > 0 && loggedCount < 30) {
-    const doneLogged = loggedDates.filter(d => state.get(d)).length;
-    completionRate = Math.round((doneLogged / loggedCount) * 100);
-  } else if (loggedCount >= 30) {
-    const last30 = loggedDates.slice(-30);
-    const done30 = last30.filter(d => state.get(d)).length;
-    completionRate = Math.round((done30 / 30) * 100);
+  // most recent DONE date (up to 'end')
+  let latestDoneISO = null;
+  for (let i = datesSorted.length - 1; i >= 0; i--) {
+    const dISO = datesSorted[i];
+    if (M(dISO).isAfter(end)) continue;
+    if (perDay.get(dISO)) { latestDoneISO = dISO; break; }
   }
 
   // --- render ---
   const wrap = dv.el("div", "", { cls: "weekly-streak-wrap" });
-  wrap.createEl("p", { text: "", cls: "streak-line" })
-    .innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"} • 📊 ${completionRate}% complete</strong>`;
 
   // header
   const head = wrap.createDiv({ cls: "weekly-streak-head" });
   ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].forEach(h => head.createDiv({ cls: "head", text: h }));
 
-  // grid, built as weeks (latest week first), days inside week Mon→Sun
+  // grid container
   const grid = wrap.createDiv({ cls: "weekly-streak-grid" });
 
-  // collect weeks from latest to oldest
+  // collect weeks newest→oldest
   const weeks = [];
   let weekEnd = gridEnd.clone().endOf("isoWeek");
   while (weekEnd.isSameOrAfter(gridStart)) {
     const weekStart = weekEnd.clone().startOf("isoWeek");
     weeks.push({ weekStart: weekStart.clone(), weekEnd: weekEnd.clone() });
-    weekEnd.subtract(1, "week"); // move to previous week
+    weekEnd.subtract(1, "week");
   }
 
-  // render each week (already newest→oldest)
+  // render each week
   for (const w of weeks) {
     let d = w.weekStart.clone();
     for (let i = 0; i < 7; i++) {
       const iso = toISO(d);
       const inWindow = d.isSameOrAfter(start) && d.isSameOrBefore(end);
-      const done = inWindow ? !!state.get(iso) : false;
+      const done = inWindow ? !!perDay.get(iso) : false;
 
       const cell = grid.createDiv({ cls: "weekly-streak-cell" });
       if (!inWindow) cell.classList.add("pad");
-      if (done && inWindow) cell.classList.add("hit");
+      if (done && inWindow) {
+        cell.classList.add("hit");
+        if (iso === latestDoneISO) cell.classList.add("latest-hit");
+      }
 
       cell.createDiv({ cls: "num", text: inWindow ? d.format("D") : "" });
       cell.createDiv({ cls: "mmm", text: inWindow ? d.format("MMM") : "" });
@@ -111,8 +206,7 @@ if (!tasks.length) {
   // --- style ---
   const style = document.createElement("style");
   style.textContent = `
-  .weekly-streak-wrap { margin-top:.5rem; }
-  .streak-line strong { font-weight:700; }
+  .weekly-streak-wrap { margin-top:.25rem; }
   .weekly-streak-head {
     display:grid; grid-template-columns: repeat(7, 1fr);
     gap:6px; max-width:520px; margin-bottom:6px;
@@ -137,304 +231,27 @@ if (!tasks.length) {
   .weekly-streak-cell .mmm {
     font-size:.7em; color: var(--text-faint); line-height:1.1; margin-top:2px;
   }
+
+  /* default DONE = theme accent (purple) */
   .weekly-streak-cell.hit {
     background: var(--interactive-accent);
   }
   .weekly-streak-cell.hit .num,
-  .weekly-streak-cell.hit .mmm {
-    color:white;
+  .weekly-streak-cell.hit .mmm { color:white; }
+
+  /* MOST RECENT DONE = orange override (same as slider) */
+  .weekly-streak-cell.latest-hit {
+    background: #f59e0b !important;
   }
+  .weekly-streak-cell.latest-hit .num,
+  .weekly-streak-cell.latest-hit .mmm { color:white; }
+
   .weekly-streak-cell.pad { opacity:.35; }
   `;
   wrap.appendChild(style);
 }
-~~~
-### Percentage
-~~~dataviewjs
-// === Habit Monthly Consistency (last 3 months, latest on top, inline %) ===
-// Shows completion rate per month + visual bars
-
-const M = window.moment;
-const toISO = d => M(d).format("YYYY-MM-DD");
-
-// --- mock generator for testing ---
-function generateFakeHabitData() {
-  const today = M();
-  const start = today.clone().subtract(89, "days");
-  const out = [];
-  let d = start.clone();
-  while (d.isSameOrBefore(today)) {
-    const done = Math.random() < 0.75;
-    out.push({ date: toISO(d), done });
-    d.add(1, "day");
-  }
-  return out;
-}
-
-// --- extract date from task text ---
-function extractISO(s) {
-  s = String(s).trim();
-  const m = s.match(/(\d{4}-\d{2}-\d{2})/);
-  return m ? m[1] : null;
-}
-
-// --- collect real tasks or generate sample ---
-let tasks = dv.current().file.tasks ?? [];
-tasks = tasks
-  .map(t => ({ date: extractISO(t.text), done: !!t.completed }))
-  .filter(t => t.date);
-
-if (!tasks.length) tasks = generateFakeHabitData();
-
-// --- collapse multiple entries per day ---
-const perDay = new Map();
-for (const t of tasks) perDay.set(t.date, (perDay.get(t.date) || false) || t.done);
-
-// --- group by month ---
-const byMonth = {};
-for (const [date, done] of perDay) {
-  const mKey = M(date).format("YYYY-MM");
-  if (!byMonth[mKey]) byMonth[mKey] = [];
-  byMonth[mKey].push({ date, done });
-}
-
-// --- find current and last 2 months (LATEST ON TOP) ---
-const months = Object.keys(byMonth).sort().slice(-3).reverse();
-
-const monthStats = months.map(mKey => {
-  const arr = byMonth[mKey];
-  const days = arr.length;
-  const doneDays = arr.filter(x => x.done).length;
-  const pct = days ? Math.round((doneDays / days) * 100) : 0;
-  return {
-    key: mKey,
-    label: M(mKey, "YYYY-MM").format("MMM"),
-    pct,
-    days,
-    doneDays
-  };
-});
-
-// --- streak ---
-let streak = 0;
-{
-  let d = M();
-  for (let i = 0; i < 90; i++) {
-    const iso = toISO(d);
-    if (perDay.get(iso)) streak++; else break;
-    d.subtract(1, "day");
-  }
-}
-
-// --- render ---
-const wrap = dv.el("div", "", { cls: "habit-monthly-summary" });
-wrap.createEl("p").innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"}</strong>`;
-
-const barWrap = wrap.createDiv({ cls: "month-bars" });
-for (const { label, pct } of monthStats) {
-  const bar = barWrap.createDiv({ cls: "month-bar" });
-  bar.createDiv({ cls: "month-label", text: label });
-  
-  // progress container
-  const progress = bar.createDiv({ cls: "progress" });
-  const barFill = progress.createDiv({ cls: "bar-fill" });
-  barFill.style.width = `${pct}%`;
-  barFill.setAttribute("title", `${pct}%`);
-
-  // percentage inline
-  const pctText = progress.createDiv({ cls: "pct-inline", text: `${pct}%` });
-}
-
-// --- style ---
-const style = document.createElement("style");
-style.textContent = `
-.habit-monthly-summary { margin: .75rem 0 1rem; }
-.month-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 320px;
-}
-.month-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.month-label {
-  width: 3ch;
-  text-align: right;
-  font-weight: 600;
-  font-size: .9em;
-}
-.progress {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.bar-fill {
-  flex: 1;
-  height: 10px;
-  background: var(--background-modifier-border);
-  border-radius: 6px;
-  position: relative;
-  overflow: hidden;
-}
-.bar-fill::after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: inherit;
-  background: var(--interactive-accent);
-  border-radius: 6px;
-}
-.pct-inline {
-  font-weight: 600;
-  font-size: .85em;
-  width: 3ch;
-  text-align: left;
-}
-`;
-wrap.appendChild(style);
 ~~~~
 
-### Merged
-~~~dataviewjs
-// === Habit Monthly Consistency (last 3 months, latest on top) ===
-// Shows completion rate per month + visual bars
-
-const M = window.moment;
-const toISO = d => M(d).format("YYYY-MM-DD");
-
-// --- mock generator for testing ---
-function generateFakeHabitData() {
-  const today = M();
-  const start = today.clone().subtract(89, "days");
-  const out = [];
-  let d = start.clone();
-  while (d.isSameOrBefore(today)) {
-    const done = Math.random() < 0.75; // ~75%
-    out.push({ date: toISO(d), done });
-    d.add(1, "day");
-  }
-  return out;
-}
-
-// --- extract date from task text ---
-function extractISO(s) {
-  s = String(s).trim();
-  const m = s.match(/(\d{4}-\d{2}-\d{2})/);
-  return m ? m[1] : null;
-}
-
-// --- collect real tasks or generate sample ---
-let tasks = dv.current().file.tasks ?? [];
-tasks = tasks
-  .map(t => ({ date: extractISO(t.text), done: !!t.completed }))
-  .filter(t => t.date);
-
-if (!tasks.length) tasks = generateFakeHabitData();
-
-// --- collapse multiple entries per day ---
-const perDay = new Map();
-for (const t of tasks) perDay.set(t.date, (perDay.get(t.date) || false) || t.done);
-
-// --- group by month ---
-const byMonth = {};
-for (const [date, done] of perDay) {
-  const mKey = M(date).format("YYYY-MM");
-  if (!byMonth[mKey]) byMonth[mKey] = [];
-  byMonth[mKey].push({ date, done });
-}
-
-// --- find current and last 2 months (LATEST ON TOP) ---
-const months = Object.keys(byMonth).sort().slice(-3).reverse();
-
-const monthStats = months.map(mKey => {
-  const arr = byMonth[mKey];
-  const days = arr.length;
-  const doneDays = arr.filter(x => x.done).length;
-  const pct = days ? Math.round((doneDays / days) * 100) : 0;
-  return {
-    key: mKey,
-    label: M(mKey, "YYYY-MM").format("MMM"),
-    pct,
-    days,
-    doneDays
-  };
-});
-
-// --- streak (simple, from today backwards) ---
-let streak = 0;
-{
-  let d = M();
-  for (let i = 0; i < 90; i++) {
-    const iso = toISO(d);
-    if (perDay.get(iso)) streak++; else break;
-    d.subtract(1, "day");
-  }
-}
-
-// --- render ---
-const wrap = dv.el("div", "", { cls: "habit-monthly-summary" });
-wrap.createEl("p").innerHTML = `<strong>🔥 Current streak: ${streak} day${streak===1?"":"s"}</strong>`;
-
-const barWrap = wrap.createDiv({ cls: "month-bars" });
-for (const { label, pct } of monthStats) {
-  const bar = barWrap.createDiv({ cls: "month-bar" });
-  bar.createDiv({ cls: "month-label", text: label });
-  const barFill = bar.createDiv({ cls: "bar-fill" });
-  barFill.style.width = `${pct}%`;
-  barFill.setAttribute("title", `${pct}%`); // keep as in your working code
-  bar.createDiv({ cls: "pct-text", text: `${pct}%` });
-}
-
-// --- style (unchanged) ---
-const style = document.createElement("style");
-style.textContent = `
-.habit-monthly-summary { margin: .75rem 0 1rem; }
-.month-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 320px;
-}
-.month-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.month-label {
-  width: 3ch;
-  text-align: right;
-  font-weight: 600;
-  font-size: .9em;
-}
-.bar-fill {
-  flex: 1;
-  height: 10px;
-  background: var(--background-modifier-border);
-  border-radius: 6px;
-  position: relative;
-  overflow: hidden;
-}
-.bar-fill::after {
-  content: "";
-  display: block;
-  height: 100%;
-  width: inherit;
-  background: var(--interactive-accent);
-  border-radius: 6px;
-}
-.pct-text {
-  width: 3ch;
-  text-align: left;
-  font-weight: 500;
-  font-size: .85em;
-}
-`;
-wrap.appendChild(style);
-~~~
 ### ✍️Log
 
 - [x] 🔁Habit - Pushup 2025-10-12 ^2025-10-12
