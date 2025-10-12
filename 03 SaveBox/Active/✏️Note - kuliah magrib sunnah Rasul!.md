@@ -18,10 +18,40 @@ Masauntuk dirinya:
 
 Hasan bertanya kepada pakciknya Min:
 
+Nabi diluar rumah sangat menjaga lidahnya terhadap perkara yg 
+
+Nabi kaidahnya mendekatkan bukn menjauhkan
+Nabi memuliakan ketua umat, untuk tujuan dakwah supaya anak buahnya juga ikut.
+
+Waktu diluar rumah:
+Nabi memberi peringatan akan azab
+Nabi tetap bermuka ceria
+Cerita 3 munafik yg tidak ikut persng sambuk
+
+Nabi selalu perhatikan orwng yang tidak nampak seperti biasanya
+
+Orang yang paling concern dengan umat adalah yg paling dekat dengan nabi
+Sebaik2 kalian adalah yg memberi manfaat kemasyarakat
+
+Dimajlis2
+Nani tidak akan duduk atau bangun sebelum menyebut nama Allah
+Hadist: manusia akan menyesal ketika dia duduk tidak menyebut nama Allah
+Doa kafaratul majlis
+Subhanakallah  warhamdika. waatubuilaik
+Pengampunan dari bualan 
+
+Nabi akan duduk di belakang jika sudah penuh
+Adab: Jumat jangan langkah orang kecuali ada kosong tidak diisi.
+
+Nabi menerima hajat orang sampai yg punya hajat pulang
 
 
-### 📫Notes Inbox 
-- [ ] 2025-10-09 ^2025-10-09
+
+___
+### 🔗➡️Links
+
+___
+### 📫Inbox 
 ~~~dataview
 table floor((date(now) - file.ctime).days) as "Age(days)"
 

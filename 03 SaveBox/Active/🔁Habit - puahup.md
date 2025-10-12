@@ -103,7 +103,7 @@ style.textContent = `
   border-radius:10px;
   background: var(--interactive-accent);
 }
-.bar-fill.bar-orange { background:#f59e0b; }
+.bar-fill.bar-orange { background:#e3963e; }
 
 .pct-text {
   display:flex; align-items:baseline; gap:1px;
@@ -255,6 +255,7 @@ if (!tasks.length) {
 ### ✍️Log
 
 - [x] 🔁Habit - puahup 2025-10-12 ^2025-10-12
+- [x] 🔁Habit - puahup 2025-10-11 ^2025-10-12
 
 
 
