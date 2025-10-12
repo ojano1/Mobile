@@ -13,7 +13,7 @@ ___
   if (!m.isValid()) { dv.paragraph("Filename needs a date like 11 Oct 2025 or 2025-10-11."); return; }
   const ISO = m.format("YYYY-MM-DD");
 
-  // --- candidates: only notes with "Task" in name, exclude Templates/Archive and names ending with "!"
+  // --- candidates: Task notes only, exclude Templates/Archive and names ending with "!"
   const pages = dv.pages().where(p =>
     !/Templates|Archive/i.test(p.file.folder) &&
     !/[!]\s*$/.test(p.file.name) &&
@@ -39,6 +39,10 @@ ___
     const m = re.exec(sec.text); if (!m) return null;
     return { checked: /\[(x|X)\]/.test(m[0]) };
   }
+  // small debounce to reduce re-render flicker on rapid toggles
+  const debounce = (fn, ms=250) => {
+    let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+  };
 
   // --- gather rows
   const rows = [];
@@ -79,7 +83,7 @@ ___
     return ap - bp || ad - bd;
   });
 
-  // --- render compact list with live checkboxes
+  // --- render with layout
   const list = document.createElement("ul");
   list.style.listStyle = "none";
   list.style.paddingLeft = "0";
@@ -88,41 +92,77 @@ ___
   for (const r of rows) {
     const li = document.createElement("li");
     li.style.display = "flex";
-    li.style.alignItems = "center";
-    li.style.gap = "8px";
-    li.style.padding = "2px 0";
+    li.style.flexDirection = "column";
+    li.style.gap = "2px";
+    li.style.padding = "4px 0";
+
+    // line 1: checkbox + link
+    const row1 = document.createElement("div");
+    row1.style.display = "flex";
+    row1.style.alignItems = "center";
+    row1.style.gap = "8px";
 
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = r.checked;
-    cb.addEventListener("change", async () => {
-      const f = app.vault.getAbstractFileByPath(r.path);
-      if (!f) return;
-      await app.fileManager.processFrontMatter(f, fm => { fm.done = cb.checked; });
-      link.classList.toggle("is-done", cb.checked);
-    });
 
     const link = document.createElement("a");
     link.textContent = r.name;
     link.href = "#";
     link.onclick = e => { e.preventDefault(); app.workspace.openLinkText(r.path, dv.current().file.path, false); };
-    if (r.checked) link.classList.add("is-done");
 
-    const meta = document.createElement("span");
-    meta.style.opacity = "0.8";
-    meta.style.marginLeft = "6px";
+    const doneMark = document.createElement("span");
+    doneMark.textContent = " ✅";
+    doneMark.style.display = r.checked ? "inline" : "none";
+
+    row1.append(cb, link, doneMark);
+
+    // line 2: YAML meta (left aligned, no leading dot)
+    const row2 = document.createElement("div");
+    row2.style.opacity = "0.8";
+    row2.style.marginLeft = "26px"; // align under link text
     const hrs = toNumOrNull(r.dur);
     const time = hrs == null ? "" : `${hrs} hr${hrs === 1 ? "" : "s"}`;
     const bits = [r.pri || "", time].filter(Boolean);
-    if (bits.length) meta.textContent = "· " + bits.join(" · ");
+    row2.textContent = bits.join(" · ");
 
-    li.append(cb, link, meta);
+    const applyDoneStyle = done => {
+      link.style.textDecoration = done ? "line-through" : "none";
+      row2.style.display = done ? "none" : "block";
+      doneMark.style.display = done ? "inline" : "none";
+    };
+    applyDoneStyle(r.checked);
+
+    // checkbox sync to YAML, debounced write
+    const saveFrontmatter = debounce(async (checked) => {
+      const f = app.vault.getAbstractFileByPath(r.path);
+      if (!f) return;
+      await app.fileManager.processFrontMatter(f, fm => { fm.done = checked; });
+    }, 200);
+
+    cb.addEventListener("change", async () => {
+      applyDoneStyle(cb.checked);   // optimistic UI
+      saveFrontmatter(cb.checked);  // debounced YAML write
+      renderAllDoneMsg();           // update footer message
+    });
+
+    li.append(row1, row2);
     list.appendChild(li);
   }
 
-  const style = document.createElement("style");
-  style.textContent = `.is-done{ text-decoration: line-through; }`;
-  dv.container.append(style, list);
+  // footer message, left-aligned like the checkboxes
+  const msg = document.createElement("div");
+  msg.style.marginTop = "8px";
+  msg.style.textAlign = "left";    // align left
+  msg.style.paddingLeft = "0";     // same left edge as checkboxes
+
+  const renderAllDoneMsg = () => {
+    const allDone = Array.from(list.querySelectorAll('input[type="checkbox"]')).every(x => x.checked);
+    msg.textContent = allDone ? "All done, nice work! 🎉☕️" : "";
+  };
+  renderAllDoneMsg();
+
+  dv.container.append(list, msg);
 })();
 ~~~
 

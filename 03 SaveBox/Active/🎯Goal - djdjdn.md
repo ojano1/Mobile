@@ -1,63 +1,48 @@
-<%*
-/*
- Project Template
- - Uses router rename ("🚀Project - <core>")
- - Adds `done` property (false by default)
- - Single main checkbox under “My Project” callout
-*/
+---
+_goal_sync_state: false
+done: false
+status: Active
+priority: Medium
+due:
+duration_hours:
+tags: []
+---
 
-const PREFIX  = "🚀Project - ";
-const title   = (tp.file.title ?? "").trim();
-const created = tp.file.creation_date("YYYY-MM-DD");
+### My Goal
+- [ ] 🎯Goal - Goal djdjdn
 
-// Extract text after last "-"
-let core = title.includes("-")
-  ? title.split("-").pop().trim()
-  : title.replace(/^[^A-Za-z0-9]+/, "").replace(/^\s*project\b\s*/i, "").trim();
-if (!core) core = "Untitled";
-
-const lines = [
-  "---",
-  "_project_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "",
-  "### My Project",
-  `- [ ] ${PREFIX}${core}`,
-  "",
-];
-
-tR = lines.join("\n");
-%>
 
 ### 👷‍♂️Instructions:
-> [!tip] Step 1: 📌Create tasks  
-> - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).
-> - Examples: “Draft spec 1 page in 1 hour”, “Email vendor shortlist in 30mins”, “Set review meeting for Tue in 15mins”.
-> - Create links to your task pages using prefix `Task - `  
+> [!tip] Step 1: 🚀Create projects to realize this goal.
+> - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
+> - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
+> - Create links to your project page using prefix `Project - `
 
-#### Type your tasks here👇  
-[[Task - example]]
+### Type your projects here👇
+[[Project - Example1]]
 '
 '
 '
 [[🧠Mind Map]]
-> [!tip] Step 2: Open task pages and confirm creation.
-#### All tasks linked to this project:
+
+
+> [!tip] Step 2: Work from the Project page
+> - Open each project note.
+> - Create tasks **in the project page**.
+
+### All the projects linked to this goals:
 ~~~dataviewjs
-// DataviewJS: first task under "### My Task" from related Task notes
-// Layout: checkbox next to link, YAML on second line, "Due" prefix
-// Behavior: strike link + ✅ when done, hide meta, sync each task note's YAML `done`,
-// set host YAML `done: true` when all checked, set `false` if any unchecked,
-// empty state message when none.
+// DataviewJS: child = Project notes (filename contains "Project").
+// Parent = current Goal note (the host).
+// Pull the FIRST task under "### My Project" from each related Project.
+// Exclude Archive/Template and names ending with "!".
+// UI: checkbox next to link. Second line shows "Due", Priority, Duration.
+// Behavior: strike link + ✅ when done, hide meta, sync child YAML `done`.
+// Host YAML `done` set true when all checked, false if any unchecked.
+// Empty state message when none.
 
 (async () => {
-  const hostPath = dv.current().file.path;
+  const hostPath = dv.current().file.path; // Goal note path
 
   // ----- helpers -----
   const prRank = { High: 1, Medium: 2, Med: 2, Low: 3, A: 1, B: 2, C: 3, 1: 1, 2: 2, 3: 3 };
@@ -71,20 +56,20 @@ tR = lines.join("\n");
   const toNumOrNull = v => Number.isFinite(Number(v)) ? Number(v) : null;
   const fmtDue = v => v ? window.moment(v).format("DD MMM YYYY") : null;
 
-  // ----- candidates -----
+  // ----- candidates: Project notes linking to this Goal -----
   const pages = dv.pages()
     .where(p => !/Archive|Template/i.test(p.file.path))
-    .where(p => /Task/i.test(p.file.name) && !/[!]\s*$/.test(p.file.name))
+    .where(p => /Project/i.test(p.file.name) && !/[!]\s*$/.test(p.file.name))
     .where(p => {
       const ins = (p.file.inlinks ?? []).some(l => l.path === hostPath);
       const outs = (p.file.outlinks ?? []).some(l => l.path === hostPath);
       return ins || outs;
     });
 
-  // ----- pick first task under "My Task" -----
+  // ----- pick first task under "My Project" -----
   const rows = [];
   for (const p of pages) {
-    const tasks = (p.file.tasks || []).filter(t => t.section?.subpath === "My Task");
+    const tasks = (p.file.tasks || []).filter(t => t.section?.subpath === "My Project");
     if (!tasks.length) continue;
     const first = tasks.sort((a, b) => a.line - b.line)[0];
 
@@ -106,7 +91,7 @@ tR = lines.join("\n");
     });
   }
 
-  if (!rows.length) { dv.paragraph("Nothing here yet, go create some tasks 📌😃"); return; }
+  if (!rows.length) { dv.paragraph("Nothing here yet, go create some tasks 🙂"); return; }
 
   // ----- sort -----
   rows.sort((a, b) => a.dueKey - b.dueKey || a.priKey - b.priKey || a.durKey - b.durKey);
@@ -117,7 +102,7 @@ tR = lines.join("\n");
   list.style.padding = "0";
   list.style.margin = "0";
 
-  // helper to update host YAML based on current checkboxes
+  // host done <- current UI state
   const updateHostDoneFromUI = async () => {
     const allDone = Array.from(list.querySelectorAll('input[type="checkbox"]')).every(x => x.checked);
     const hostFile = app.vault.getAbstractFileByPath(hostPath);
@@ -170,13 +155,13 @@ tR = lines.join("\n");
     };
     applyDoneStyle(r.checked);
 
-    // sync YAML on change + update host done true/false
+    // sync child YAML + update host YAML
     cb.addEventListener("change", async () => {
       const f = app.vault.getAbstractFileByPath(r.path);
       if (!f) return;
       await app.fileManager.processFrontMatter(f, fm => { fm.done = cb.checked; });
       applyDoneStyle(cb.checked);
-      await updateHostDoneFromUI(); // <-- set true or false based on all checkboxes
+      await updateHostDoneFromUI();
     });
 
     li.append(row1, row2);
@@ -184,7 +169,7 @@ tR = lines.join("\n");
   }
 
   // set host done based on initial state
-  await (async () => { await updateHostDoneFromUI(); })();
+  await updateHostDoneFromUI();
 
   dv.container.append(list);
 })();
@@ -206,9 +191,13 @@ ___
 '
 '
 ___
-### 🔗➡️Links  :
-*Add goal links here if missing in the backlinks*
 
+### 🔗➡️Links:
+*Add Area links here if none in backlinks section.*
+'
+'
+'
+'
 ___
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs

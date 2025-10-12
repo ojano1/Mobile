@@ -113,7 +113,7 @@ tR = lines.join("\n");
     });
   }
 
-  if (!rows.length) { dv.paragraph("Nothing here yet, go create some tasks 🙂"); return; }
+  if (!rows.length) { dv.paragraph("Nothing here yet, go create some projects 🚀😃"); return; }
 
   // ----- sort -----
   rows.sort((a, b) => a.dueKey - b.dueKey || a.priKey - b.priKey || a.durKey - b.durKey);

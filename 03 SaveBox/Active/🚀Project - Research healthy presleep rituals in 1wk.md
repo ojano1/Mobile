@@ -3,13 +3,13 @@ priority: Medium
 status: Active
 create date: 2025-10-10
 due:
-done: true
-_project_sync_state: true
+done: false
+_project_sync_state: false
 ---
 
 Tags (start with # and a letter): #Oct
 ### My Project
-- [x] 🚀Project - Research healthy presleep rituals in 1wk
+- [ ] 🚀Project - Research healthy presleep rituals in 1wk
 
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: 📌Create tasks  

@@ -1,15 +1,15 @@
 ---
-_task_sync_state: true
-done: true
+_task_sync_state: false
+done: false
 status: Active
 priority: Medium
-due: 2025-10-11
+due:
 duration_hours:
 tags: []
 ---
 
 ### My Task
-- [x] 📌Task - task test1
+- [ ] 📌Task - Task dkdjdn
 
 
 ### 👷‍♂️Instructions:
@@ -42,4 +42,3 @@ const backlinks = dv.pages()
 if (backlinks.length) dv.list(backlinks.map(p => p.file.link));
 else dv.paragraph("None");
 ~~~
-
