@@ -410,21 +410,55 @@ What will you do differently tomorrow?
 '
 ---
 ### 📫Inbox:
-(Remove suffix ! from file name to release)
-~~~dataview
-TABLE
-  dateformat(file.ctime, "yyyy-MM-dd") AS Created,
-  gap + " " + choice(gap = 1, "day", "days") AS Age
-FROM "03 SaveBox/Active"
-WHERE endswith(file.name, "!")
-FLATTEN floor((
-  date(dateformat(date(now), "yyyy-MM-dd"))
-  - date(dateformat(file.ctime, "yyyy-MM-dd"))
-).milliseconds / 86400000) AS gap
-SORT file.ctime ASC
+(Remove suffix ! to release from inbox)
+~~~dataviewjs
+// 📂 Inbox (no date, tight spacing)
+// Excludes Archive + Templates + Notes
+// Only includes filenames ending with "!"
 
+const M = window.moment;
+
+// --- filters ---
+const pages = dv.pages().where(p =>
+  p.file &&
+  !/Archive|Templates/i.test(p.file.folder || "") &&
+  !/note/i.test(p.file.name || "") &&
+  /!\s*$/.test(p.file.name || "")
+);
+
+// --- sort oldest → newest ---
+const list = pages.array().sort((a,b) => (a.file.ctime ?? 0) - (b.file.ctime ?? 0));
+
+if (!list.length) {
+  dv.el("p", "Inbox empty.");
+} else {
+  const today = M();
+
+  const lines = list.map(p => {
+    const created = M(p.file.ctime);
+    const days = today.diff(created, "days");
+    const ageLabel = days === 0 ? "today" : `${days} day${days === 1 ? "" : "s"} ago`;
+    return `- ${p.file.link} • ${ageLabel}`;
+  });
+
+  const wrap = dv.el("div", lines.join("\n"), { cls: "inbox-list" });
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .inbox-list {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      line-height: 1.5;
+    }
+    .inbox-list p, .inbox-list ul, .inbox-list div {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+  `;
+  wrap.appendChild(style);
+}
 ~~~
-### 🔗Backlinks:
+### 🔗⬅️Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
   .where(p =>
