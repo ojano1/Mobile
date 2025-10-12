@@ -6,12 +6,13 @@ due: 2025-10-12
 duration_hours: "0.25"
 done: false
 _task_sync_state: false
+timeslot: Morning
 ---
 
 Tags (start with # and a letter):
 
 ### My Task
-- [ ] 📌Task - Find 10 ways to enhance sleep in 15mins
+- [ ] 📌Task - Find 10 ways to enhance sleep in 15 mins
 
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: ✍️Add more details

@@ -6,6 +6,7 @@ due: 2025-10-12
 duration_hours: "1"
 done: false
 _task_sync_state: false
+timeslot: Morning
 ---
 
 Tags (start with # and a letter): #Oct
