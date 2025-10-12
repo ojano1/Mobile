@@ -1,6 +1,6 @@
 ---
-_project_sync_state: false
-done: false
+_project_sync_state: true
+done: true
 status: Active
 priority: Medium
 due:
@@ -9,7 +9,7 @@ tags: []
 ---
 
 ### My Project
-- [ ] 🚀Project - tedt
+- [x] 🚀Project - tedt
 
 
 ### 👷‍♂️Instructions:
