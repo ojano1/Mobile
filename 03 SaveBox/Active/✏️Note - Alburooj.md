@@ -18,29 +18,6 @@ created: 13 Oct 2025
 
 
 ___
-#### 🔗➡️Frequently used links
-~~~dataviewjs
-// 📅 Show today's daily note and Mind Map link
-
-const M = window.moment;
-const todayStr = M().format("DD MMM YYYY");
-
-const pages = dv.pages().where(p =>
-  p.file &&
-  !/Archive|Templates/i.test(p.file.folder || "") &&
-  (p.file.name || "").includes(todayStr)
-);
-
-if (!pages.length) {
-  dv.paragraph(`📅 None found • Today's daily note`);
-} else {
-  const link = pages[0].file.link;
-  dv.paragraph(`📅 ${link} • Today's daily note`);
-}
-
-dv.paragraph(`[[🧠Mind Map]] • Bird's-eye view`);
-~~~
-___
 #### 📫Notes Inbox 
 *Remove "!" to release*
 ~~~dataviewjs
@@ -101,10 +78,11 @@ if (!list.length) {
 ~~~
 ___
 #### 🔗Links:
--
+- [[📌Task - Find 10 ways to enhance sleep in 15mins]]
 ~~~dataviewjs
 // 📅 Daily + Mind Map on top, then linked/backlink notes (A–Z)
 // For Task/Project/Goal: show Done / Not Done instead of date
+// Do not duplicate the daily note link
 
 const M = window.moment;
 const todayStr = M().format("DD MMM YYYY");
@@ -117,7 +95,11 @@ const todays = dv.pages().where(p =>
   !/Archive|Templates/i.test(p.file.folder || "") &&
   (p.file.name || "").includes(todayStr)
 );
-const daily = todays.length ? todays[0].file.link : "None";
+
+const dailyFile = todays.length ? todays[0].file : null;
+const dailyPath = dailyFile?.path ?? null;
+const daily = dailyFile ? dailyFile.link : "None";
+
 dv.el("div", `📅 ${daily} • Today's daily note`, { cls: "note-line" });
 dv.el("div", `[[🧠Mind Map]] • Bird's-eye view`, { cls: "note-line" });
 
@@ -172,8 +154,9 @@ const backlinks = dv.pages()
   )
   .array();
 
-// unique, sort A–Z by name
+// unique, drop daily note, sort A–Z
 const unique = Array.from(new Map([...linked, ...backlinks].map(p => [p.file.path, p])).values())
+  .filter(p => p.file.path !== dailyPath)
   .sort((a, b) => (a.file.name || "").localeCompare(b.file.name || "", undefined, { sensitivity: "base" }));
 
 // --- Render if any ---
