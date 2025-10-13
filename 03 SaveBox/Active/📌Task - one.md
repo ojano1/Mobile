@@ -24,7 +24,7 @@ ___
 ___
 
 ### 🔗Links:
--
+- 
 ~~~dataviewjs
 // 📅 Daily + Mind Map on top, then linked/backlink notes (A–Z)
 // For Task/Project/Goal: show Done / Not Done instead of date

@@ -29,7 +29,7 @@ ___
 ___
 ### 🔗Links:
 -
-~~~dataviewjs
+```dataviewjs
 // 📅 Daily + Mind Map on top, then linked/backlink notes (A–Z)
 // For Task/Project/Goal: show Done / Not Done instead of date
 
@@ -124,6 +124,6 @@ style.textContent = `
 .note-list br { line-height: 1.4; }
 `;
 dv.container.append(style);
-~~~
+```
 ___
 <p align="center">Template created by Akhmad Fauzan<br>©️All rights reserved</p>

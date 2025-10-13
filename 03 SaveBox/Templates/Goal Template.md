@@ -49,8 +49,8 @@ ___
 > - Open each project note.
 > - Create tasks **in the project page**.
 ___
-### My progress:
-~~~dataviewjs
+### 🔋My progress:
+```dataviewjs
 // Projects linked to this Goal — progress by total duration_hours
 // One purple bar shows % of total hours completed. Host `done` = all checked.
 
@@ -236,7 +236,7 @@ ___
   // mount
   dv.container.append(progWrap, listDiv);
 })();
-~~~
+```
 ___
 > [!tip] Step 3️⃣: (Optional) Create done criteria
 > - Outcome, amount, or result

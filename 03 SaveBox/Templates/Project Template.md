@@ -48,8 +48,8 @@ tR = lines.join("\n");
 - 
 ___
 > [!tip] Step 2: Open task pages and confirm creation.
-#### All tasks linked to this project:
-~~~dataviewjs
+#### 🔋My progress
+```dataviewjs
 // Tasks linked to this note — with single purple progress bar (duration_hours-weighted)
 // Keeps original behavior. Progress = sum(duration_hours of done) / sum(all duration_hours).
 
@@ -236,7 +236,7 @@ ___
 })();
 
 
-~~~
+```
 ___
 > [!tip] Step 3: ✅(Optional) Create done criteria
 > - Outcome, amount, or result
