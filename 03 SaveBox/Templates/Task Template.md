@@ -1,7 +1,3 @@
----
-done: true
-_goal_sync_state: true
----
 <%*
 /*
  Task Template
@@ -23,7 +19,8 @@ const core   = (m ? m[2] : title).trim();
 const lines = [
   "---",
   "_task_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
+  "done: false",                // editable checkbox in Properties view 
+  "created: <% tp.file.creation_date("DD MMM YYYY") %>",
   "status: Active",             // Active | Archived
   "priority: Medium",           // High | Medium | Low
   "due: ",                      // fill later
@@ -46,6 +43,7 @@ tR = lines.join("\n");
 
 ### ✍️Description  
 ''
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ___
 
 ### ✅Done Criteria  

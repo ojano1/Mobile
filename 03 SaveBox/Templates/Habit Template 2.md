@@ -1,4 +1,6 @@
-
+---
+created: <% tp.file.creation_date("DD MMM YYYY") %>
+---
 
 ~~~dataviewjs
 // === Habit Monthly Consistency (last 3 months, #bde3c0 zone) ===

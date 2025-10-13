@@ -16,9 +16,9 @@ ___
 '
 '
 >[!tip] Step 2: Make one wish per area that would make you happy.
->- Ask yourself: What makes me happy in my (area) is if I have/can...
+>- Ask yourself: What makes me happy with my (area) is if I have/can...
 ### Write your wishes here👇
-Example: What makes me happy in my health is if I can wake up fresh everyday. 
+Example: What makes me happy with my health is if I can wake up fresh everyday. 
 '
 '
 '
@@ -26,9 +26,9 @@ Example: What makes me happy in my health is if I can wake up fresh everyday.
 >[!tip] Step 3: Set a goal that makes it almost impossible for your wish not to come true. 
 >*Two things decide your wish: God and your effort. You can’t control God, but you can work to tilt the odds in your favor.*
 >- Open  each areas you've just made,
->- Follow the instruction In the area page😊
+>- Follow the instruction there 😊
 
-[[🧠Mind Map]]
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ___
 ### ✍️Comments:
 '

@@ -11,15 +11,10 @@ ___
 >- Create your Area link. Name it with prefix `Area - `
 ### Write your Areas here👇
 [[🌱Area - Health]]
-[[🌱Area - Finance]]
-[[🌱Area - Business]]
-[[🌱Area - Family]]
-[[🌱Area - Deen]]
-
 >[!tip] Step 2: Make one wish per area that would make you happy.
->- Ask yourself: What makes me happy in my (area) is if I have/can do...
+>- Ask yourself: What makes me happy with my (area) is if I have/can do...
 ### Write your wishes here👇
-Example: What makes me happy in my health is if I can wake up feeling fresh everyday. 
+Example: What makes me happy with my health is if I can wake up feeling fresh everyday. 
 '
 '
 '
@@ -29,7 +24,7 @@ Example: What makes me happy in my health is if I can wake up feeling fresh ever
 >- Open  each areas you've just made,
 >- Follow the instruction In the area page😊
 
-[[🧠Mind Map]]
+See [[🧠Mind Map]] for bird eye view.
 ___
 ### ✍️Comments:
 '

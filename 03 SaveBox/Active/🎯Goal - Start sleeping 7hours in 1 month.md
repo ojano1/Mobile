@@ -22,7 +22,7 @@ Add tags here (start with # and 1 letter):
 [[🚀Project - Research healthy presleep rituals in 1wk]]
 [[🚀Project - build a set of habits to commit in 1wk]]
 '
-[[🧠Mind Map]]
+See [[🧠Mind Map]] for bird eye view.
 
 > [!tip] Step 2: Work from the Project page
 > - Open each project note.

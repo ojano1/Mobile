@@ -98,7 +98,7 @@ if (HY == null) {
   }
 }
 ~~~
-[[🧠Mind Map]]
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 
 >[!tip] 2️⃣Schedule your projects into Q1-Q4
 >- Open the link to your **goal notes** and type a  quarter tag. E.g. #Q1 

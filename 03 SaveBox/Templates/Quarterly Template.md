@@ -100,7 +100,7 @@ if (!HQ) {
   }
 }
 ~~~
-[[🧠Mind Map]]
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 
 
 >[!tip] 2️⃣Open the monthly note by:  

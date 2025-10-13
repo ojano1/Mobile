@@ -190,7 +190,7 @@ ___
   dv.container.append(wrap, msg);
 })();
 ~~~
-[[🧠Mind Map]]
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ### My Habits for today:
 ```dataviewjs
 const HABIT_FOLDER = "03 SaveBox/Active";

@@ -119,8 +119,7 @@ if (!HW.week) {
 }
 
 ~~~
-[[🧠Mind Map]]
-
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 >[!tip] 2️⃣Open the daily note by:  
 > - 💻 On desktop: `Ctrl + P` → *Periodic Notes: Open daily note*
 > - 📱 On mobile: Swipe down → *Periodic Notes: Open daily note*

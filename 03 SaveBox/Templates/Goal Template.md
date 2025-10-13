@@ -19,6 +19,7 @@ const lines = [
   "---",
   "_goal_sync_state: false",
   "done: false",                // editable checkbox in Properties view
+  "created: <% tp.file.creation_date("DD MMM YYYY") %>",
   "status: Active",             // Active | Archived
   "priority: Medium",           // High | Medium | Low
   "due: ",                      // fill later
@@ -45,7 +46,7 @@ tR = lines.join("\n");
 '
 '
 '
-[[🧠Mind Map]]
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 
 
 > [!tip] Step 2: Work from the Project page

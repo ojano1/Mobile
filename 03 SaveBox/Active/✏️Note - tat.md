@@ -1,9 +1,8 @@
 ---
-created: <% tp.file.creation_date("DD MMM YYYY") %>
+created: 13 Oct 2025
 ---
-#### ✍️Description:
-•
-•
+
+
 
 
 
@@ -66,11 +65,7 @@ if (!list.length) {
 
 
 ~~~
-<%*
-// wait for file open, then fold editor
-await new Promise(r => setTimeout(r, 200));
-app.commands.executeCommandById('editor:fold-all');
-%>
+
 
 
 ___
@@ -91,8 +86,4 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
-<%*
-// wait for file open, then fold editor
-await new Promise(r => setTimeout(r, 200));
-app.commands.executeCommandById('editor:fold-all');
-%>
+

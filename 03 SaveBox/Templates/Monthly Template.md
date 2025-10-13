@@ -123,8 +123,7 @@ if (!HM) {
 }
 
 ```
-[[🧠Mind Map]]
-
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 >[!tip] 2️⃣Open the weekly note by:  
 > - 💻 On desktop: `Ctrl + P` → *Periodic Notes: Open weekly note*
 > - 📱 On mobile: Swipe down → *Periodic Notes: Open weekly note*
