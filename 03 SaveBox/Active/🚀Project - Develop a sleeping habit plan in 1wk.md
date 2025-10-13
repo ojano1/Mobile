@@ -185,7 +185,105 @@ ___
 ___
 ### 🔗➡️Links  :
 *Add goal links here if missing in the backlinks*
+- 
+~~~dataviewjs
+// 📅 Today's daily note + Mind Map + Linked Notes + Backlinks (balanced spacing)
 
+const M = window.moment;
+const todayStr = M().format("DD MMM YYYY");
+const cur = dv.current().file ?? {};
+const curPath = cur.path ?? "";
+
+// --- today's daily note ---
+const todays = dv.pages().where(p =>
+  p.file &&
+  !/Archive|Templates/i.test(p.file.folder || "") &&
+  (p.file.name || "").includes(todayStr)
+);
+
+const daily = todays.length ? todays[0].file.link : "None";
+dv.el("div", `📅 ${daily} • Today's daily note`, { cls: "note-line" });
+
+// --- mind map line ---
+dv.el("div", `[[🧠Mind Map]] • Bird's-eye view`, { cls: "note-line" });
+
+// --- helpers ---
+const normalizeLinks = links =>
+  (links ?? []).map(l => typeof l === "string" ? l : l?.path).filter(Boolean);
+
+const createdOf = p => {
+  if (p?.created) {
+    const m = M(p.created, ["DD MMM YYYY", "YYYY-MM-DD"], true);
+    if (m.isValid()) return m;
+  }
+  return M(p?.file?.ctime);
+};
+
+// --- linked and backlink pages ---
+const curOut = new Set(normalizeLinks(cur.outlinks));
+
+const base = dv.pages().where(p => {
+  const f = p?.file;
+  if (!f) return false;
+  const folder = f.folder ?? "";
+  const name = f.name ?? "";
+  if (/Archive|Templates/i.test(folder)) return false;
+  if (!/note/i.test(name)) return false;
+  if (name.includes("!")) return false;
+  if (f.path === curPath) return false;
+  return true;
+});
+
+// pages that link to or are linked from current file
+const linked = base
+  .where(p => {
+    const path = p.file.path;
+    const pOut = normalizeLinks(p.file.outlinks);
+    const linksToCur = pOut.includes(curPath);
+    const linkedFromCur = curOut.has(path);
+    return linksToCur || linkedFromCur;
+  })
+  .array();
+
+// backlinks (anything linking here)
+const backlinks = dv.pages()
+  .where(p =>
+    p.file?.outlinks?.some(l => l.path === curPath) &&
+    !/Archive|Templates/i.test(p.file.folder || "")
+  )
+  .array();
+
+const all = [...linked, ...backlinks];
+const unique = Array.from(new Map(all.map(p => [p.file.path, p])).values())
+  .sort((a, b) => createdOf(a).valueOf() - createdOf(b).valueOf());
+
+// --- render if any ---
+if (unique.length) {
+  const items = unique.map(p => {
+    const dateStr = createdOf(p).format("DD MMM YYYY");
+    return `${p.file.link} • ${dateStr}`;
+  });
+  dv.el("div", items.join("<br>"), { cls: "note-list" });
+}
+
+// --- styles ---
+const style = document.createElement("style");
+style.textContent = `
+.note-line {
+  margin: 3px 0 !important;
+  padding: 0 !important;
+  line-height: 1.4;
+}
+
+.note-list {
+  margin-top: 5px !important;
+  padding: 0 !important;
+  line-height: 1.4;
+}
+.note-list br { line-height: 1.4; }
+`;
+dv.container.append(style);
+~~~
 ___
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs
