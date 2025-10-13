@@ -309,5 +309,6 @@ style.textContent = `
 dv.container.append(style);
 ~~~
 ___
+<p align="center">Template created by Akhmad Fauzan<br>©️All rights reserved</p>
 
 
