@@ -5,14 +5,13 @@ created: 13 Oct 2025
 status: Active
 priority: Medium
 due:
-duration_hours:
+duration_hours: "0"
 tags: []
 ---
 
 ### My Project
 - [ ] 🚀Project - Develop a sleeping habit plan in 1wk
-
-
+___
 ### 👷‍♂️Instructions:
 > [!tip] Step 1: 📌Create tasks  
 > - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).

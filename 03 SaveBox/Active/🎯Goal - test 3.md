@@ -1,48 +1,25 @@
-<%*
-/*
- Goal Template
- - Works with your router ("🎯Goal - <core>")
- - Reads the prefix from the filename
- - Adds a frontmatter `done` property (false by default)
- - One goal per note, under "### My Goal"
-*/
+---
+_goal_sync_state: false
+done: false
+created: 13 Oct 2025
+status: Active
+priority: Medium
+due:
+duration_hours:
+tags: []
+---
 
-const title = (tp.file.title ?? "").trim();
-
-// Extract "<prefix>" and "<core>" from "<prefix><core>"
-// Example title: "🎯Goal - Launch v2"
-const m = title.match(/^(.*?\bGoal\s*-\s*)(.+)$/i);
-const prefix = m ? m[1] : "🎯Goal - ";
-const core   = (m ? m[2] : title).trim();
-
-const lines = [
-  "---",
-  "_goal_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-`created: ${tp.file.creation_date("DD MMM YYYY")}`,
-
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "### My Goal",
-  `- [ ] ${prefix}${core}`,
-  "",
-  "#### Description",
-  "- ", // placeholder line for user to start typing description
-  "---",
-  "",
-];
-tR = lines.join("\n");
-%>
+### My Goal
+- [ ] 🎯Goal - goal test 3
+#### Description
+- 
+---
 > [!tip] Step 1️⃣: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
 > - Create links to your project page using prefix `Project - `
 
-### ✍️Type your projects here
+### Type your projects here👇
 [[Project - Example1]]
 - 
 ___
@@ -53,13 +30,15 @@ ___
 > - Open each project note.
 > - Create tasks **in the project page**.
 ___
-### My progress:
+### All the projects linked to this goals:
 ~~~dataviewjs
-// Projects linked to this Goal — progress by total duration_hours
-// One purple bar shows % of total hours completed. Host `done` = all checked.
+// Projects linked to this Goal — reference-style layout (grid, single row)
+// Functionality kept: first task under "### My Project", exclude Archive/Templates/!,
+// checkbox syncs child YAML `done`, strike + ✅ when done, hide meta,
+// host YAML `done` = all checked, sorted by Due, Priority, Duration.
 
 (async () => {
-  const hostPath = dv.current().file.path;
+  const hostPath = dv.current().file.path; // Goal note path
 
   // --- helpers ---
   const prRank = { High: 1, Medium: 2, Med: 2, Low: 3, A: 1, B: 2, C: 3, 1: 1, 2: 2, 3: 3 };
@@ -93,7 +72,7 @@ ___
     const checked = typeof p.done === "boolean" ? p.done : !!first.completed;
     const due = first.due ?? p.due ?? p.due_date ?? null;
     const pri = prShow(p.priority ?? p.prio ?? null);
-    const durNum = toNumOrNull(p.duration_hours ?? p.duration ?? null); // <-- use duration_hours
+    const durNum = toNumOrNull(p.duration_hours ?? p.duration ?? null);
 
     rows.push({
       path: p.file.path,
@@ -114,46 +93,19 @@ ___
   // --- sort: Due, then Priority, then Duration ---
   rows.sort((a, b) => a.dueKey - b.dueKey || a.priKey - b.priKey || a.durKey - b.durKey);
 
-  // --- progress bar: duration-weighted ---
+  // --- render: grid layout, single row per item (checkbox + content with inline meta) ---
   const listDiv = document.createElement("div");
-  const progWrap = dv.el("div", "", { cls: "proj-progress" });
 
-  const renderProgress = (checkedCount, totalCount, doneDur, totalDur) => {
-    const pct = totalDur > 0
-      ? Math.round((doneDur / totalDur) * 100)
-      : Math.round((checkedCount / Math.max(totalCount,1)) * 100); // fallback if no durations
-    progWrap.innerHTML = `
-      <div class="proj-progress-row" title="${doneDur}/${totalDur} hrs done">
-        <div class="proj-bar-track">
-          <div class="proj-bar-fill" style="width:${pct}%;"></div>
-        </div>
-        <div class="proj-pct-text">${pct}<span class="proj-pct-symbol">%</span></div>
-      </div>
-    `;
-  };
-
-  // initial numbers
-  let totalDur = rows.reduce((s, r) => s + (r.durNum ?? 0), 0);
-  let doneDur  = rows.reduce((s, r) => s + ((r.checked ? (r.durNum ?? 0) : 0)), 0);
-  renderProgress(rows.filter(r => r.checked).length, rows.length, doneDur, totalDur);
-
-  // --- host done <- current UI state and update bar
-  const updateFromUI = async () => {
-    const boxes = listDiv.querySelectorAll('input[type="checkbox"][data-dur]');
-    const checkedNow = Array.from(boxes).filter(x => x.checked).length;
-    const doneDurNow = Array.from(boxes).reduce((s, x) => s + (x.checked ? Number(x.dataset.dur) : 0), 0);
-    const totalDurNow = Array.from(boxes).reduce((s, x) => s + Number(x.dataset.dur), 0);
-
-    // host YAML `done` when all checked
+  // update host YAML `done` from current checkboxes
+  const updateHostDoneFromUI = async () => {
+    const boxes = listDiv.querySelectorAll('input[type="checkbox"]');
+    if (!boxes.length) return;
+    const allDone = Array.from(boxes).every(x => x.checked);
     const hostFile = app.vault.getAbstractFileByPath(hostPath);
-    if (hostFile) {
-      await app.fileManager.processFrontMatter(hostFile, fm => { fm.done = (checkedNow === boxes.length && boxes.length > 0); });
-    }
-
-    renderProgress(checkedNow, boxes.length, doneDurNow, totalDurNow);
+    if (!hostFile) return;
+    await app.fileManager.processFrontMatter(hostFile, fm => { fm.done = allDone; });
   };
 
-  // --- render rows (grid, checkbox + inline meta) ---
   for (const r of rows) {
     const row = document.createElement("div");
     row.style.display = "grid";
@@ -167,7 +119,6 @@ ___
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = r.checked;
-    cb.dataset.dur = String(r.durNum ?? 0); // <-- duration for progress
     cb.style.margin = "0";
 
     const content = document.createElement("div");
@@ -175,7 +126,7 @@ ___
     content.style.lineHeight = "1.35";
 
     const link = document.createElement("a");
-    link.textContent = r.text;
+    link.textContent = r.text; // keep original behavior: show first task text
     link.href = "#";
     link.style.minWidth = "0";
     link.onclick = e => {
@@ -183,6 +134,7 @@ ___
       app.workspace.openLinkText(r.path, dv.current().file.path, false);
     };
 
+    // meta inline: "· Due 13 Oct 2025 · Priority · 2 hrs"
     const meta = document.createElement("span");
     meta.style.opacity = "0.8";
     meta.style.marginLeft = "8px";
@@ -208,44 +160,23 @@ ___
     };
     applyDoneStyle(r.checked);
 
+    // sync child YAML + update host YAML
     cb.addEventListener("change", async () => {
       const f = app.vault.getAbstractFileByPath(r.path);
-      if (f) await app.fileManager.processFrontMatter(f, fm => { fm.done = cb.checked; });
+      if (!f) return;
+      await app.fileManager.processFrontMatter(f, fm => { fm.done = cb.checked; });
       applyDoneStyle(cb.checked);
-      await updateFromUI();
+      await updateHostDoneFromUI();
     });
   }
 
-  // initial sync
-  await updateFromUI();
+  // initial host done sync
+  await updateHostDoneFromUI();
 
-  // --- styles ---
-  const style = document.createElement("style");
-  style.textContent = `
-.proj-progress { margin:.5rem 0 .75rem; max-width:560px; }
-.proj-progress-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
-.proj-bar-track {
-  position:relative; height:14px; border-radius:10px; overflow:hidden;
-  background: color-mix(in srgb, var(--background-modifier-border) 35%, transparent);
-}
-.proj-bar-fill {
-  position:absolute; top:0; left:0; bottom:0; border-radius:10px;
-  background:#7c3aed; /* purple */
-}
-.proj-pct-text { display:flex; align-items:baseline; gap:1px; font-weight:600; font-size:1.05em; white-space:nowrap; }
-.proj-pct-symbol { font-size:.8em; line-height:1; }
-`;
-  dv.container.append(style);
-
-  // mount
-  dv.container.append(progWrap, listDiv);
+  dv.container.append(listDiv);
 })();
-___
-### Linked notes:
-```dataviewjs
 
-```
-___
+~~~
 See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ___
 > [!tip] Step 3️⃣: (Optional) Create done criteria

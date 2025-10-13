@@ -28,22 +28,20 @@ const lines = [
   "duration_hours: ",           // number
   "tags: []",                   // YAML array
   "---",
-  "",
   "### My Task",
   `- [ ] ${prefix}${core}`,
+ "",
+  "#### Description",
+  "- ", // placeholder line for user to start typing description
+  "---",
   "",
 ];
-
 tR = lines.join("\n");
 %>
-
-### 👷‍♂️Instructions:
-> [!tip] Step 1: ✍️Add details  
+> [!tip] Step 1️⃣: ✍️Add details  
 > - Describe, set duration_hours  
 > - Define expected output
-
-### ✍️Description  
-''
+___
 See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ___
 

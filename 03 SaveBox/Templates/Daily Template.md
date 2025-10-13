@@ -1,8 +1,7 @@
-### ✍️Fleet Notes
+### ✍️Fleeting Notes
 
-'
-'
-'
+- 
+- 
 ___
 ### 📌My tasks for today
 ~~~dataviewjs
@@ -190,8 +189,8 @@ ___
   dv.container.append(wrap, msg);
 })();
 ~~~
-See the [[🧠Mind Map]] for a bird’s-eye view of your life.
-### My Habits for today:
+___
+### 🔁My habits for today:
 ```dataviewjs
 const HABIT_FOLDER = "03 SaveBox/Active";
 
@@ -222,7 +221,7 @@ if (!fileDate) {
 }
 
 ```
-### Overdue Tasks
+### ⏰My overdue tasks
 ~~~dataviewjs
 (async () => {
   // --- host date from filename: "11 Oct 2025" or "2025-10-11"
@@ -400,14 +399,14 @@ if (!fileDate) {
 })();
 ~~~
 ___
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
+___
 #### 🔄 End-of-Day Review
 How did the day go?
 What worked and what didn’t?
 What will you do differently tomorrow?
-'
-'
-'
-'
+- 
+- 
 ---
 ### 📫Inbox:
 (Remove suffix ! to release from inbox)
@@ -458,6 +457,7 @@ if (!list.length) {
   wrap.appendChild(style);
 }
 ~~~
+___
 ### 🔗⬅️Backlinks:
 ~~~dataviewjs
 const backlinks = dv.pages()
@@ -475,7 +475,8 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
-
+___
+<p align="center">Template created by Akhmad Fauzan. <br>All rights reserved</p>
 ```templater
 <%*
 const HABIT_FOLDER = "03 SaveBox/Active";
@@ -555,5 +556,5 @@ for (const file of files) {
 %>
 
 ```
-
+___
 
