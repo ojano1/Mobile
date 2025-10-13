@@ -20,7 +20,7 @@ ___
 >- *Start a with one goal first to build momentum*
 ### My goals👇
 [[Goal - Example]]
-- [[🎯Goal - Start sleeping for 7hours in 1month]]
+- [[🎯Goal - Start sleeping for 7hrs in 1month]]
 ___
 See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 > [!tip] Step 3️⃣: Work from the goal page

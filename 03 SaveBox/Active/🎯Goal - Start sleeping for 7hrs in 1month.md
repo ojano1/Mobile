@@ -1,39 +1,17 @@
-<%*
-/*
- Goal Template
- - Works with your router ("🎯Goal - <core>")
- - Reads the prefix from the filename
- - Adds a frontmatter `done` property (false by default)
- - One goal per note, under "### My Goal"
-*/
+---
+_goal_sync_state: false
+done: false
+created: 13 Oct 2025
+status: Active
+priority: Medium
+due:
+duration_hours:
+tags: []
+---
 
-const title = (tp.file.title ?? "").trim();
+### My Goal
+- [ ] 🎯Goal - goal Start sleeping for 7hrs in 1month
 
-// Extract "<prefix>" and "<core>" from "<prefix><core>"
-// Example title: "🎯Goal - Launch v2"
-const m = title.match(/^(.*?\bGoal\s*-\s*)(.+)$/i);
-const prefix = m ? m[1] : "🎯Goal - ";
-const core   = (m ? m[2] : title).trim();
-
-const lines = [
-  "---",
-  "_goal_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-`created: ${tp.file.creation_date("DD MMM YYYY")}`,
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "",
-  "### My Goal",
-  `- [ ] ${prefix}${core}`,
-  "",
-];
-
-tR = lines.join("\n");
-%>
 ___
 > [!tip] Step 1️⃣: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
@@ -42,7 +20,8 @@ ___
 
 ### Type your projects here👇
 [[Project - Example1]]
-- 
+- [[🚀Project - Find sleep difficulty causes in 1wk]]
+- [[🚀Project - Develop a sleeping habit plan in 1wk]]
 ___
 
 
@@ -195,6 +174,7 @@ ___
   dv.container.append(list);
 })();
 ~~~
+___
 See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 ___
 > [!tip] Step 3️⃣: (Optional) Create done criteria
@@ -240,3 +220,4 @@ if (backlinks.length) {
 }
 ~~~
 ___
+

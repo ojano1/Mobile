@@ -20,7 +20,8 @@ const lines = [
   "---",
   "_project_sync_state: false",
   "done: false",                // editable checkbox in Properties view
-  "created: <% tp.file.creation_date("DD MMM YYYY") %>",
+`created: ${tp.file.creation_date("DD MMM YYYY")}`,
+
   "status: Active",             // Active | Archived
   "priority: Medium",           // High | Medium | Low
   "due: ",                      // fill later
