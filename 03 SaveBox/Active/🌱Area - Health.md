@@ -1,16 +1,16 @@
 ---
-priority: High
+priority: Medium
 status: Active
-create date: 2025-10-13
+created: 2025-10-13
 ---
 
 >[!tip] Step 1️⃣: Make one wish in this area that would make you happy.
 >- Ask yourself: What makes me happy with my (area) is if I have/can do...
 >- *Start a with one wish first to build momentum*
-#### My wish is👇
+#### My wishes👇
 *Example: What makes me happy with my health is if I can wake up feeling fresh everyday.*
+-  What makes me happy with my health is if I can wake up feeling fresh everyday.
 
-•
 ___
 >[!tip] Step 2️⃣: Set a clear 🎯goal that makes it almost impossible for your wish not to come true. 
 >*You can’t control God, but you can work to tilt the odds in your favor.*
@@ -18,10 +18,9 @@ ___
 > - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
 > - Create a link to your goal page using prefix `Goal - `
 >- *Start a with one goal first to build momentum*
-### My goal is👇
+### My goals👇
 [[Goal - Example]]
-
-•
+- [[🎯Goal - Start sleeping for 7hours in 1month]]
 ___
 See the [[🧠Mind Map]] for a bird’s-eye view of your life.
 > [!tip] Step 3️⃣: Work from the goal page
@@ -54,6 +53,3 @@ if (backlinks.length) {
 ~~~
 ___
 <p align="center">Template created by Akhmad Fauzan. <br>All rights reserved</p>
-
-
-

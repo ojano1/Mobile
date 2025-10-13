@@ -4,38 +4,22 @@
 >— _Surah Ar-Ra’d (13:11)_
 
 ___
-
->[!tip] Step 1: 🌱Define Your Areas
+>[!tip] Step 1️⃣: 🌱Define Your Areas
 >- Write down the areas of life that matter to you❤️. Examples: Health, Relationships, Career, Money, Faith, Travel. 
 >- Hint: Start light with with one or two Area's only.
 >- Create your Area link. Name it with prefix `Area - `
-### Write your Areas here👇
-[[Area Example]]
-'
-'
-'
-'
->[!tip] Step 2: Make one wish per area that would make you happy.
->- Ask yourself: What makes me happy with my (area) is if I have/can...
-### Write your wishes here👇
-Example: What makes me happy with my health is if I can wake up fresh everyday. 
-'
-'
-'
-'
->[!tip] Step 3: Set a goal that makes it almost impossible for your wish not to come true. 
->*Two things decide your wish: God and your effort. You can’t control God, but you can work to tilt the odds in your favor.*
->- Open  each areas you've just made,
->- Follow the instruction there 😊
+### My Areas👇
 
-See the [[🧠Mind Map]] for a bird’s-eye view of your life.
+- [[🌱Area - Health]]
+___
+>[!tip] Step 2️⃣:  Open  each areas you've just made
+>- Follow the instruction In the area page😊
+
+See the [[🧠Mind Map]] for bird-eye view of your life.
 ___
 ### ✍️Comments:
-'
-'
-'
-'
+- 
 ___
 
-
+<p align="center">Template created by Akhmad Fauzan. <br>©️All rights reserved</p>
 

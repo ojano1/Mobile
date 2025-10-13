@@ -34,25 +34,23 @@ const lines = [
 
 tR = lines.join("\n");
 %>
-
-### 👷‍♂️Instructions:
-> [!tip] Step 1: 🚀Create projects to realize this goal.
+___
+> [!tip] Step 1️⃣: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
 > - Create links to your project page using prefix `Project - `
 
 ### Type your projects here👇
 [[Project - Example1]]
-'
-'
-'
-See the [[🧠Mind Map]] for a bird’s-eye view of your life.
+- 
+___
 
 
-> [!tip] Step 2: Work from the Project page
+
+> [!tip] Step 2️⃣: Work from the Project page
 > - Open each project note.
 > - Create tasks **in the project page**.
-
+___
 ### All the projects linked to this goals:
 ~~~dataviewjs
 // DataviewJS: child = Project notes (filename contains "Project").
@@ -114,7 +112,7 @@ See the [[🧠Mind Map]] for a bird’s-eye view of your life.
     });
   }
 
-  if (!rows.length) { dv.paragraph("Nothing here yet, go create some projects 🚀😃"); return; }
+  if (!rows.length) { dv.paragraph("Nothing here yet, go create some projects 🚀"); return; }
 
   // ----- sort -----
   rows.sort((a, b) => a.dueKey - b.dueKey || a.priKey - b.priKey || a.durKey - b.durKey);
@@ -197,7 +195,9 @@ See the [[🧠Mind Map]] for a bird’s-eye view of your life.
   dv.container.append(list);
 })();
 ~~~
-> [!tip] Step 3: ✅(Optional) Create done criteria
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
+___
+> [!tip] Step 3️⃣: (Optional) Create done criteria
 > - Outcome, amount, or result
 > - Deadline
 > - How you will verify
@@ -239,3 +239,5 @@ if (backlinks.length) {
   dv.paragraph("None");
 }
 ~~~
+___
+<p align="center">Template created by Akhmad Fauzan. <br>All rights reserved</p>
