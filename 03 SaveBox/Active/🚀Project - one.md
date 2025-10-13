@@ -1,58 +1,34 @@
-<%*
-/*
- Goal Template
- - Works with your router ("🎯Goal - <core>")
- - Reads the prefix from the filename
- - Adds a frontmatter `done` property (false by default)
- - One goal per note, under "### My Goal"
-*/
+---
+_project_sync_state: false
+done: false
+created: 13 Oct 2025
+status: Active
+priority: Medium
+due:
+duration_hours:
+tags: []
+---
+### My Project
+- [ ] 🚀Project - one
 
-const title = (tp.file.title ?? "").trim();
-
-// Extract "<prefix>" and "<core>" from "<prefix><core>"
-// Example title: "🎯Goal - Launch v2"
-const m = title.match(/^(.*?\bGoal\s*-\s*)(.+)$/i);
-const prefix = m ? m[1] : "🎯Goal - ";
-const core   = (m ? m[2] : title).trim();
-
-const lines = [
-  "---",
-  "_goal_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-`created: ${tp.file.creation_date("DD MMM YYYY")}`,
-
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "### My Goal",
-  `- [ ] ${prefix}${core}`,
-  "",
-  "#### ✍️Description",
-  "- ", // placeholder line for user to start typing description
-  "---",
-  "",
-];
-tR = lines.join("\n");
-%>
-> [!tip] Step 1️⃣: 🚀Create projects to realize this goal.
-> - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
-> - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
-> - Create links to your project page using prefix `Project - `
-### ✍️Type your projects here
-[[Project - Example1]]
+#### ✍️Description
 - 
+---
+
+> [!tip] Step 1️⃣: 📌Create tasks  
+> - Use verb, measurable, time unit (ideally 1 hour max per task, split if needed).
+> - Examples: “Draft spec 1 page in 1 hour”, “Email vendor shortlist in 30mins”, “Set review meeting for Tue in 15mins”.
+> - Create links to your task pages using prefix `Task - `  
+
+#### Type your tasks here👇  
+[[Task - example]]
+- [[📌Task - one]]
 ___
-> [!tip] Step 2️⃣: Work from the Project page
-> - Open each project note.
-> - Create tasks **in the project page**.
-___
-### My progress:
+> [!tip] Step 2: Open task pages and confirm creation.
+#### All tasks linked to this project:
 ~~~dataviewjs
-// Projects linked to this Goal — progress by total duration_hours
-// One purple bar shows % of total hours completed. Host `done` = all checked.
+// Tasks linked to this note — with single purple progress bar (duration_hours-weighted)
+// Keeps original behavior. Progress = sum(duration_hours of done) / sum(all duration_hours).
 
 (async () => {
   const hostPath = dv.current().file.path;
@@ -69,27 +45,27 @@ ___
   const toNumOrNull = v => Number.isFinite(Number(v)) ? Number(v) : null;
   const fmtDue = v => v ? window.moment(v).format("DD MMM YYYY") : null;
 
-  // --- candidates: Project notes linking to this Goal ---
+  // --- candidates: Task notes linking to this host ---
   const pages = dv.pages()
     .where(p => !/Archive|Template/i.test(p.file.path))
-    .where(p => /Project/i.test(p.file.name) && !/[!]\s*$/.test(p.file.name))
+    .where(p => /Task/i.test(p.file.name) && !/[!]\s*$/.test(p.file.name))
     .where(p => {
       const ins = (p.file.inlinks ?? []).some(l => l.path === hostPath);
       const outs = (p.file.outlinks ?? []).some(l => l.path === hostPath);
       return ins || outs;
     });
 
-  // --- pick first task under "My Project" ---
+  // --- pick first task under "My Task" ---
   const rows = [];
   for (const p of pages) {
-    const tasks = (p.file.tasks || []).filter(t => t.section?.subpath === "My Project");
+    const tasks = (p.file.tasks || []).filter(t => t.section?.subpath === "My Task");
     if (!tasks.length) continue;
     const first = tasks.sort((a, b) => a.line - b.line)[0];
 
     const checked = typeof p.done === "boolean" ? p.done : !!first.completed;
     const due = first.due ?? p.due ?? p.due_date ?? null;
     const pri = prShow(p.priority ?? p.prio ?? null);
-    const durNum = toNumOrNull(p.duration_hours ?? p.duration ?? null); // <-- use duration_hours
+    const durNum = toNumOrNull(p.duration_hours ?? p.duration ?? null); // duration_hours
 
     rows.push({
       path: p.file.path,
@@ -105,42 +81,41 @@ ___
     });
   }
 
-  if (!rows.length) { dv.paragraph("Nothing here yet, go create some projects 🚀"); return; }
+  if (!rows.length) { dv.paragraph("Nothing here yet, go create some tasks 📌😃"); return; }
 
   // --- sort: Due, then Priority, then Duration ---
   rows.sort((a, b) => a.dueKey - b.dueKey || a.priKey - b.priKey || a.durKey - b.durKey);
 
   // --- progress bar: duration-weighted ---
   const listDiv = document.createElement("div");
-  const progWrap = dv.el("div", "", { cls: "proj-progress" });
+  const progWrap = dv.el("div", "", { cls: "task-progress" });
 
   const renderProgress = (checkedCount, totalCount, doneDur, totalDur) => {
     const pct = totalDur > 0
       ? Math.round((doneDur / totalDur) * 100)
-      : Math.round((checkedCount / Math.max(totalCount,1)) * 100); // fallback if no durations
+      : Math.round((checkedCount / Math.max(totalCount, 1)) * 100); // fallback if no durations
     progWrap.innerHTML = `
-      <div class="proj-progress-row" title="${doneDur}/${totalDur} hrs done">
-        <div class="proj-bar-track">
-          <div class="proj-bar-fill" style="width:${pct}%;"></div>
+      <div class="task-progress-row" title="${doneDur}/${totalDur} hrs done">
+        <div class="task-bar-track">
+          <div class="task-bar-fill" style="width:${pct}%;"></div>
         </div>
-        <div class="proj-pct-text">${pct}<span class="proj-pct-symbol">%</span></div>
+        <div class="task-pct-text">${pct}<span class="task-pct-symbol">%</span></div>
       </div>
     `;
   };
 
-  // initial numbers
+  // initial bar
   let totalDur = rows.reduce((s, r) => s + (r.durNum ?? 0), 0);
   let doneDur  = rows.reduce((s, r) => s + ((r.checked ? (r.durNum ?? 0) : 0)), 0);
   renderProgress(rows.filter(r => r.checked).length, rows.length, doneDur, totalDur);
 
-  // --- host done <- current UI state and update bar
+  // host done <- current UI state + update bar
   const updateFromUI = async () => {
     const boxes = listDiv.querySelectorAll('input[type="checkbox"][data-dur]');
     const checkedNow = Array.from(boxes).filter(x => x.checked).length;
     const doneDurNow = Array.from(boxes).reduce((s, x) => s + (x.checked ? Number(x.dataset.dur) : 0), 0);
     const totalDurNow = Array.from(boxes).reduce((s, x) => s + Number(x.dataset.dur), 0);
 
-    // host YAML `done` when all checked
     const hostFile = app.vault.getAbstractFileByPath(hostPath);
     if (hostFile) {
       await app.fileManager.processFrontMatter(hostFile, fm => { fm.done = (checkedNow === boxes.length && boxes.length > 0); });
@@ -149,7 +124,7 @@ ___
     renderProgress(checkedNow, boxes.length, doneDurNow, totalDurNow);
   };
 
-  // --- render rows (grid, checkbox + inline meta) ---
+  // --- render rows (grid, single row per item) ---
   for (const r of rows) {
     const row = document.createElement("div");
     row.style.display = "grid";
@@ -163,7 +138,7 @@ ___
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = r.checked;
-    cb.dataset.dur = String(r.durNum ?? 0); // <-- duration for progress
+    cb.dataset.dur = String(r.durNum ?? 0); // use duration for progress
     cb.style.margin = "0";
 
     const content = document.createElement("div");
@@ -171,7 +146,7 @@ ___
     content.style.lineHeight = "1.35";
 
     const link = document.createElement("a");
-    link.textContent = r.text;
+    link.textContent = r.text; // first task text
     link.href = "#";
     link.style.minWidth = "0";
     link.onclick = e => {
@@ -218,27 +193,29 @@ ___
   // --- styles ---
   const style = document.createElement("style");
   style.textContent = `
-.proj-progress { margin:.5rem 0 .75rem; max-width:560px; }
-.proj-progress-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
-.proj-bar-track {
+.task-progress { margin:.5rem 0 .75rem; max-width:560px; }
+.task-progress-row { display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px; }
+.task-bar-track {
   position:relative; height:14px; border-radius:10px; overflow:hidden;
   background: color-mix(in srgb, var(--background-modifier-border) 35%, transparent);
 }
-.proj-bar-fill {
+.task-bar-fill {
   position:absolute; top:0; left:0; bottom:0; border-radius:10px;
   background:#7c3aed; /* purple */
 }
-.proj-pct-text { display:flex; align-items:baseline; gap:1px; font-weight:600; font-size:1.05em; white-space:nowrap; }
-.proj-pct-symbol { font-size:.8em; line-height:1; }
+.task-pct-text { display:flex; align-items:baseline; gap:1px; font-weight:600; font-size:1.05em; white-space:nowrap; }
+.task-pct-symbol { font-size:.8em; line-height:1; }
 `;
   dv.container.append(style);
 
   // mount
   dv.container.append(progWrap, listDiv);
 })();
+
+
 ~~~
 ___
-> [!tip] Step 3️⃣: (Optional) Create done criteria
+> [!tip] Step 3: ✅(Optional) Create done criteria
 > - Outcome, amount, or result
 > - Deadline
 > - How you will verify
@@ -346,3 +323,4 @@ dv.container.append(style);
 ~~~
 ___
 <p align="center">Template created by Akhmad Fauzan<br>©️All rights reserved</p>
+

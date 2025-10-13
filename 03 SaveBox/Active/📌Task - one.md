@@ -1,32 +1,28 @@
 ---
-priority: Medium
+_task_sync_state: false
+done: false
+created: 13 Oct 2025
 status: Active
-created: <% tp.file.creation_date("YYYY-MM-DD") %>
+priority: Medium
+due:
+duration_hours:
+tags: []
 ---
-### ✍️Description
-- 
-___
->[!tip] Step 1️⃣: Make one wish in this area that would make you happy.
->- Ask yourself: What makes me happy with my (area) is if I have/can do...
->- *Start a with one wish first to build momentum*
-### ✍️My wishes
-*Example: What makes me happy with my health is if I can wake up feeling fresh everyday.*
-- 
+### My Task
+- [ ] 📌Task - task one
 
+#### ✍️Description
+- 
+---
+
+> [!tip] Step 1️⃣: ✍️Add details  
+> - Fill in due date and hour duration in the property
+> - Define expected output
 ___
->[!tip] Step 2️⃣: Set a clear 🎯goal that makes it almost impossible for your wish not to come true. 
->*You can’t control God, but you can work to tilt the odds in your favor.*
-> - Use verb, measurable amount, time duration.
-> - Examples: “Save $3,000 this year”, “Lose 5 kg this month”.
-> - Create a link to your goal page using prefix `Goal - `
->- *Start a with one goal first to build momentum*
-### ✍️My goals
-[[Goal - Example]]
+### ✅Done Criteria  
 - 
 ___
-> [!tip] Step 3️⃣: Work from the goal page
-> - Open the goal link you just created and create projects there.
-___
+
 ### 🔗Links:
 -
 ~~~dataviewjs

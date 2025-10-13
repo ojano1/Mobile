@@ -1,50 +1,30 @@
-<%*
-/*
- Goal Template
- - Works with your router ("🎯Goal - <core>")
- - Reads the prefix from the filename
- - Adds a frontmatter `done` property (false by default)
- - One goal per note, under "### My Goal"
-*/
+---
+_goal_sync_state: false
+done: false
+created: 13 Oct 2025
+status: Active
+priority: Medium
+due:
+duration_hours:
+tags: []
+---
+### My Goal
+- [ ] 🎯Goal - goal one
 
-const title = (tp.file.title ?? "").trim();
+#### ✍️Description
+- 
+---
 
-// Extract "<prefix>" and "<core>" from "<prefix><core>"
-// Example title: "🎯Goal - Launch v2"
-const m = title.match(/^(.*?\bGoal\s*-\s*)(.+)$/i);
-const prefix = m ? m[1] : "🎯Goal - ";
-const core   = (m ? m[2] : title).trim();
-
-const lines = [
-  "---",
-  "_goal_sync_state: false",
-  "done: false",                // editable checkbox in Properties view
-`created: ${tp.file.creation_date("DD MMM YYYY")}`,
-
-  "status: Active",             // Active | Archived
-  "priority: Medium",           // High | Medium | Low
-  "due: ",                      // fill later
-  "duration_hours: ",           // number
-  "tags: []",                   // YAML array
-  "---",
-  "### My Goal",
-  `- [ ] ${prefix}${core}`,
-  "",
-  "#### ✍️Description",
-  "- ", // placeholder line for user to start typing description
-  "---",
-  "",
-];
-tR = lines.join("\n");
-%>
 > [!tip] Step 1️⃣: 🚀Create projects to realize this goal.
 > - Think milestones, use verb, measurable amount, time duration (ideally 1 month max per project, split if needed).
 > - Examples: “Set up a saving vault in 1 week”, “Save $250 each month”, “Build an expense tracker in 1 week”.
 > - Create links to your project page using prefix `Project - `
+
 ### ✍️Type your projects here
 [[Project - Example1]]
-- 
+- [[🚀Project - one]]
 ___
+
 > [!tip] Step 2️⃣: Work from the Project page
 > - Open each project note.
 > - Create tasks **in the project page**.
@@ -238,6 +218,13 @@ ___
 })();
 ~~~
 ___
+### Linked notes:
+```dataviewjs
+
+```
+___
+See the [[🧠Mind Map]] for a bird’s-eye view of your life.
+___
 > [!tip] Step 3️⃣: (Optional) Create done criteria
 > - Outcome, amount, or result
 > - Deadline
@@ -245,6 +232,32 @@ ___
 
 #### ✅Done Criteria:
 - 
+___
+### ✍️Comments:
+- 
+___
+
+### 🔗➡️Links:
+*Add Area links here if none in backlinks section.*
+- 
+___
+### 🔗⬅️Backlinks:
+~~~dataviewjs
+const backlinks = dv.pages()
+  .where(p =>
+    p.file.outlinks &&
+    p.file.outlinks.some(link => link.path === dv.current().file.path) &&
+    !/template/i.test(p.file.folder) &&
+    !/archive/i.test(p.file.folder)
+  )
+  .sort(p => p.file.name, 'asc');
+
+if (backlinks.length) {
+  dv.list(backlinks.map(p => p.file.link));
+} else {
+  dv.paragraph("None");
+}
+~~~
 ___
 ### 🔗Links:
 -

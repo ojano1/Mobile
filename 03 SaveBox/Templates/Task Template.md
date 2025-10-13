@@ -39,7 +39,7 @@ const lines = [
 tR = lines.join("\n");
 %>
 > [!tip] Step 1️⃣: ✍️Add details  
-> - Describe, set duration_hours  
+> - Fill in due date and hour duration in the property
 > - Define expected output
 ___
 ### ✅Done Criteria  

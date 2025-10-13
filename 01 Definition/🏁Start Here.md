@@ -11,6 +11,7 @@ ___
 ### My Areas👇
 
 - [[🌱Area - Health]]
+- [[🌱Area - One]]
 ___
 >[!tip] Step 2️⃣:  Open  each areas you've just made
 >- Follow the instruction In the area page😊
